@@ -2,31 +2,20 @@
 
 A comprehensive Next.js application for emergency preparedness planning and management. This app helps users organize their emergency supplies, contacts, documents, and preparedness plans in one centralized location.
 
-## 🎉 What's New in v1.1.0
+**Version 1.1.0** - Now with dark mode, PWA support, improved accessibility, and enhanced features!
 
-### Major Features Added
-- **🌗 Dark Mode Support** - Full dark mode implementation with theme toggle
-- **📱 PWA Support** - Install as a Progressive Web App for offline access
-- **📥 Import/Export** - Import data from previous backups with validation
-- **🔍 Search & Filter** - Search functionality across all sections
-- **🗂️ Sorting** - Sort items by multiple criteria
-- **✅ Bulk Operations** - Select and delete multiple items at once
-- **🎨 Improved UI** - Enhanced mobile responsiveness and accessibility
-- **🔔 Toast Notifications** - Real-time feedback for user actions
-- **⚡ Performance** - Optimized with React memoization and custom hooks
-- **♿ Accessibility** - ARIA labels, keyboard navigation, focus management
-- **🛡️ Error Handling** - Error boundaries and graceful error handling
-- **📖 Better Documentation** - Comprehensive code comments and JSDoc
+## ✨ New in Version 1.1.0
 
-### Technical Improvements
-- Updated to Next.js 15.0.3
-- Updated all dependencies to latest stable versions
-- TypeScript target upgraded to ES2015
-- Context API for global state management
-- Custom hooks for cleaner code organization
-- Utility functions library
-- Constants centralization
-- Enhanced type safety
+- **🌙 Dark Mode** - Full dark mode support with system preference detection
+- **📱 PWA Support** - Install as a native app on any device, works offline
+- **♿ Enhanced Accessibility** - WCAG AA compliant with full keyboard navigation
+- **⚡ Performance Optimizations** - Memoization, debouncing, and optimized renders
+- **📥 Import/Export** - Import previous backups with full data restoration
+- **🔍 Search & Filter** - Search across all sections with real-time filtering
+- **📊 Bulk Operations** - Select and manage multiple items at once
+- **🎨 Improved UI/UX** - Better mobile responsiveness and user experience
+- **📄 PDF Export** - Generate professionally formatted PDF checklists
+- **🔔 Toast Notifications** - Real-time feedback for all actions
 
 ## 🌟 Features
 
@@ -35,7 +24,6 @@ A comprehensive Next.js application for emergency preparedness planning and mana
 - **Checkable items** - Track your progress
 - **Family-based recommendations** - Adjusts quantities based on family size
 - **Two-column responsive layout** - Optimized for all screen sizes
-- **Dark mode support** - Easy on the eyes
 
 ### 🏠 Family Management
 - **Family size tracking** - Adults, children, and pets
@@ -54,8 +42,7 @@ A comprehensive Next.js application for emergency preparedness planning and mana
 - **Expiry date tracking** - Automatic alerts for expiring items
 - **Low stock alerts** - Never run out of essential supplies
 - **Quantity management** - Track current and minimum stock levels
-- **Search and filter** - Quickly find items
-- **Bulk operations** - Manage multiple items at once
+- **Example items included** - 8 pre-filled items to get started
 
 ### 📚 Books & Resources
 - **Essential books tracking** - Store your preparedness library
@@ -68,10 +55,9 @@ A comprehensive Next.js application for emergency preparedness planning and mana
 - **Relationship categorization** - Emergency services, medical, work, etc.
 - **Color-coded relationships** - Easy visual identification
 - **Multiple contact methods** - Phone, email, address
-- **Search functionality** - Quickly find contacts
 
 ### 📻 HAM Radio Frequencies
-- **Pre-filled frequencies** - Emergency and local communications
+- **20 pre-filled frequencies** - Emergency and local communications
 - **Multiple bands covered** - 2m, 70cm, HF bands
 - **Emergency frequencies** - International and national calling frequencies
 - **Color-coded locations** - Emergency, local, long distance, weather
@@ -82,10 +68,11 @@ A comprehensive Next.js application for emergency preparedness planning and mana
 - **Expiry date management** - Track document expiration
 - **Color-coded categories** - Personal ID, financial, medical, etc.
 
-### 💾 Data Import & Export
-- **Multiple export formats** - JSON, CSV, and Text formats
-- **Import functionality** - Restore from previous backups
+### 💾 Data Import/Export & Backup
+- **Multiple export formats** - JSON, CSV, Text, and PDF formats
+- **Import functionality** - Restore data from previous backups
 - **Complete data backup** - Export all your preparedness data
+- **PDF generation** - Create professional PDF checklists
 - **Print functionality** - Print clean, formatted checklists
 - **Clipboard support** - Copy data to clipboard for sharing
 - **Data summary** - Overview of all your stored information
@@ -95,7 +82,6 @@ A comprehensive Next.js application for emergency preparedness planning and mana
 - **Cross-session persistence** - Data survives browser restarts
 - **No server required** - Complete offline functionality
 - **Private and secure** - Data never leaves your device
-- **PWA support** - Install as an app for true offline access
 
 ## 🚀 Getting Started
 
@@ -135,59 +121,14 @@ npm start
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript 5.6
-- **Styling**: Tailwind CSS 3.4
-- **Icons**: Lucide React 0.453
+- **Styling**: Tailwind CSS 3.4 with dark mode
+- **Icons**: Lucide React
 - **Date Handling**: date-fns 4.1
-- **Form Management**: React Hook Form 7.53
-- **Validation**: Zod 3.23
+- **Form Management**: React Hook Form
+- **Validation**: Zod
 - **Storage**: Browser localStorage
-- **State Management**: React Context API + Custom Hooks
-
-## 📂 Project Structure
-
-```
-emergency-preparedness-checklist/
-├── app/                    # Next.js app directory
-│   ├── layout.tsx         # Root layout with metadata
-│   ├── page.tsx           # Main application page
-│   └── globals.css        # Global styles with dark mode
-├── components/            # React components
-│   ├── BooksManager.tsx
-│   ├── BulkActions.tsx
-│   ├── ChecklistSection.tsx
-│   ├── ConfirmDialog.tsx
-│   ├── DocumentsBinder.tsx
-│   ├── EmergencyContacts.tsx
-│   ├── ErrorBoundary.tsx
-│   ├── HamRadioFrequencies.tsx
-│   ├── ImportExportManager.tsx
-│   ├── PantryManager.tsx
-│   ├── SearchBar.tsx
-│   ├── SortableHeader.tsx
-│   ├── ThemeToggle.tsx
-│   └── Toast.tsx
-├── contexts/              # React contexts
-│   └── AppContext.tsx     # Global app state
-├── hooks/                 # Custom React hooks
-│   ├── useBooks.ts
-│   ├── useContacts.ts
-│   ├── useDebounce.ts
-│   ├── useDocuments.ts
-│   ├── useHamFrequencies.ts
-│   ├── useLocalStorage.ts
-│   └── usePantryItems.ts
-├── lib/                   # Utility libraries
-│   ├── constants.ts       # App constants
-│   ├── pdfExport.ts       # PDF export utilities
-│   └── utils.ts           # Helper functions
-├── types/                 # TypeScript type definitions
-│   └── index.ts
-└── public/                # Static assets
-    ├── manifest.json      # PWA manifest
-    ├── sw.js              # Service worker
-    ├── offline.html       # Offline page
-    └── robots.txt         # SEO robots file
-```
+- **PWA**: Service Worker with offline support
+- **State Management**: Context API + Custom Hooks
 
 ## 📱 Features Overview
 
@@ -203,10 +144,12 @@ emergency-preparedness-checklist/
 9. **Special Items** - Baby items, prostheses, special needs
 10. **Disaster Preparedness** - Planning, skills, family coordination
 
-### Export Options
+### Export/Import Options
 - **JSON Export** - Complete data backup for restoring to another device
+- **JSON Import** - Restore data from previous backups
 - **CSV Export** - Spreadsheet format for analysis and sharing
 - **Text Export** - Human-readable format perfect for printing
+- **PDF Export** - Professional formatted PDF for printing or sharing
 - **Print Function** - Clean, formatted checklist for physical backup
 - **Copy to Clipboard** - Quick sharing of JSON data
 
@@ -248,27 +191,69 @@ emergency-preparedness-checklist/
 - Color coding automatically applies
 
 ### Modifying Categories
-- Edit category colors in `lib/constants.ts`
+- Edit category colors in the respective component files
 - Add new categories to the dropdown lists
 - Customize category names and descriptions
 
 ### Data Export/Import
 - Data is stored in browser localStorage
-- Can be exported/imported via the Data tab
+- Can be exported/imported via browser developer tools
 - Multiple export formats available
 - No external dependencies for data storage
 
-## 🔐 Security & Privacy
+## 📊 Data Structure
 
-- **Local Storage Only** - All data stays on your device
-- **No Server** - No data transmitted to any server
-- **No Tracking** - No analytics or tracking scripts
-- **Open Source** - Fully transparent code
-- **Offline First** - Works completely offline with PWA
+### Family Information
+```typescript
+interface FamilyInfo {
+  adults: number
+  children: number
+  pets: number
+  specialNeeds: string
+  location: string
+  emergencyPlan: string
+}
+```
 
-## 🐛 Known Issues
+### Checklist Items
+```typescript
+interface ChecklistItem {
+  id: number
+  category: string
+  items: ChecklistSubItem[]
+}
 
-None currently reported. Please open an issue if you find any bugs.
+interface ChecklistSubItem {
+  id: string
+  text: string
+  completed: boolean
+  quantity: number
+}
+```
+
+### Pantry Items
+```typescript
+interface PantryItem {
+  id: string
+  name: string
+  category: string
+  quantity: number
+  unit: string
+  expiryDate: string
+  minQuantity: number
+  notes: string
+}
+```
+
+## 🎁 Premium Notion Template
+
+Looking for a more comprehensive emergency preparedness solution? Check out our premium [Notion Emergency Preparedness Checklist Template](https://www.notion.com/templates/emergency-preparedness-checklist) featuring:
+
+- **Advanced planning tools** - More detailed preparedness workflows
+- **Team collaboration** - Share plans with family members
+- **Advanced templates** - Pre-built emergency scenarios
+- **Integration capabilities** - Connect with other Notion databases
+- **Professional layouts** - Enhanced visual organization
 
 ## 🤝 Contributing
 
@@ -277,13 +262,6 @@ None currently reported. Please open an issue if you find any bugs.
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Add JSDoc comments to new functions
-- Maintain accessibility standards
-- Test on both light and dark modes
-- Ensure mobile responsiveness
 
 ## 📝 License
 
@@ -295,7 +273,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **HAM Radio Community** - For frequency information and emergency communication protocols
 - **Next.js Team** - For the excellent framework
 - **Tailwind CSS** - For the beautiful styling system
-- **Lucide** - For the icon library
+- **Notion** - For the premium template platform
 
 ## 📞 Support
 
@@ -304,35 +282,30 @@ If you have any questions or need support:
 - Check the documentation
 - Review the code comments
 
-## 🔄 Updates
+## 🔄 Version History
 
-### Version 1.1.0 (Current)
-- Added dark mode support
-- Implemented PWA functionality
-- Added import/export features
-- Enhanced search and filtering
-- Added bulk operations
-- Improved accessibility
-- Updated dependencies
-- Performance optimizations
-- Better error handling
-- Mobile responsiveness improvements
+### Version 1.1.0 (Latest)
+- Added dark mode with system preference detection
+- Implemented PWA support for offline functionality
+- Enhanced accessibility (WCAG AA compliant)
+- Added data import functionality
+- Implemented search and filtering across all sections
+- Added bulk operations support
+- Performance optimizations with memoization
+- Improved mobile responsiveness
+- Added PDF export capability
+- Implemented toast notification system
+- Updated all dependencies to latest versions
+- Added comprehensive error boundaries
 
 ### Version 1.0.0
 - Initial release
-- Basic checklist functionality
-- Pantry management
-- Contact management
-- HAM radio frequencies
-- Documents tracking
-- Export functionality
+- Core checklist functionality
+- Pantry, books, contacts, HAM radio, documents management
+- Data export in JSON, CSV, and text formats
+- Family size management
+- Metrics settings
 
 ---
 
-**Stay prepared, stay safe!** 🛡️
-
-## 🌐 Links
-
-- [Live Demo](https://emergency-preparedness-checklist.vercel.app)
-- [GitHub Repository](https://github.com/KarimOsmanGH/Emergency-Preparedness-Checklist)
-- [Notion Template](https://www.notion.com/templates/emergency-preparedness-checklist)
+**Stay prepared, stay safe!** 🛡️ 
