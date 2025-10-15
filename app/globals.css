@@ -6,23 +6,28 @@
   html {
     font-family: system-ui, sans-serif;
   }
+  
+  /* Dark mode color scheme */
+  html.dark {
+    color-scheme: dark;
+  }
 }
 
 @layer components {
   .checklist-item {
-    @apply flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 hover:border-brown-300 transition-colors;
+    @apply flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-brown-300 dark:hover:border-brown-500 transition-colors;
   }
   
   .checklist-item.completed {
-    @apply bg-brown-50 border-brown-200;
+    @apply bg-brown-50 dark:bg-brown-900/30 border-brown-200 dark:border-brown-700;
   }
   
   .checklist-item.completed .item-text {
-    @apply line-through text-gray-500;
+    @apply line-through text-gray-500 dark:text-gray-400;
   }
   
   .family-info-card {
-    @apply bg-gradient-to-br from-brown-50 to-brown-100 border border-brown-200 rounded-xl p-6 shadow-sm;
+    @apply bg-gradient-to-br from-brown-50 to-brown-100 dark:from-brown-900/30 dark:to-brown-800/30 border border-brown-200 dark:border-brown-700 rounded-xl p-6 shadow-sm;
   }
   
   .status-badge {
@@ -30,14 +35,44 @@
   }
   
   .status-badge.completed {
-    @apply bg-green-100 text-green-800;
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300;
   }
   
   .status-badge.pending {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300;
   }
   
   .status-badge.overdue {
-    @apply bg-red-100 text-red-800;
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300;
+  }
+}
+
+@layer utilities {
+  /* Animations */
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+  
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
   }
 } 
