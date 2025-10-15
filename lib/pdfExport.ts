@@ -204,3 +204,9 @@ export function printChecklist(data: any): void {
     })
   }
 }
+
+/**
+ * Generate PDF by opening print dialog
+ * Alias for printChecklist for backward compatibility
+ */
+export const generatePDF = printChecklist
