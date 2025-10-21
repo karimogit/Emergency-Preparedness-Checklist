@@ -79,6 +79,17 @@ export default function ChecklistSection({ checklistItems, onUpdateItem, familyI
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-semibold text-gray-900">{category.category}</h3>
                     </div>
+                    <button
+                      onClick={() => toggleCategory(category.id)}
+                      className="p-1 rounded-lg hover:bg-brown-200 dark:hover:bg-brown-700 transition-colors"
+                      aria-label={collapsedCategories.has(category.id) ? 'Expand category' : 'Collapse category'}
+                    >
+                      {collapsedCategories.has(category.id) ? (
+                        <ChevronRight className="h-5 w-5 text-brown-600" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-brown-600" />
+                      )}
+                    </button>
                   </div>
                   
                   {/* Category Progress Bar */}
@@ -96,37 +107,39 @@ export default function ChecklistSection({ checklistItems, onUpdateItem, familyI
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <div className="space-y-3">
-                    {category.items.map((item) => {
-                      const displayText = convertWaterText(item.text)
-                      
-                      return (
-                        <div 
-                          key={item.id} 
-                          className={`checklist-item ${item.completed ? 'completed' : ''}`}
-                        >
-                          <button
-                            onClick={() => onUpdateItem(category.id, item.id, !item.completed)}
-                            className="flex-shrink-0"
+                {!collapsedCategories.has(category.id) && (
+                  <div className="p-6">
+                    <div className="space-y-3">
+                      {category.items.map((item) => {
+                        const displayText = convertWaterText(item.text)
+                        
+                        return (
+                          <div 
+                            key={item.id} 
+                            className={`checklist-item ${item.completed ? 'completed' : ''}`}
                           >
-                            {item.completed ? (
-                              <CheckCircle className="h-6 w-6 text-brown-600" />
-                            ) : (
-                              <Circle className="h-6 w-6 text-gray-400 hover:text-brown-500" />
-                            )}
-                          </button>
-                          
-                          <div className="flex-1 min-w-0">
-                            <p className={`item-text text-sm font-medium ${item.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                              {displayText}
-                            </p>
+                            <button
+                              onClick={() => onUpdateItem(category.id, item.id, !item.completed)}
+                              className="flex-shrink-0"
+                            >
+                              {item.completed ? (
+                                <CheckCircle className="h-6 w-6 text-brown-600" />
+                              ) : (
+                                <Circle className="h-6 w-6 text-gray-400 hover:text-brown-500" />
+                              )}
+                            </button>
+                            
+                            <div className="flex-1 min-w-0">
+                              <p className={`item-text text-sm font-medium ${item.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                                {displayText}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )
           })}
