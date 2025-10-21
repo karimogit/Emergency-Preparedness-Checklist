@@ -1,6 +1,7 @@
 'use client'
 
-import { CheckCircle, Circle, AlertTriangle, Users } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Circle, AlertTriangle, Users, ChevronDown, ChevronRight } from 'lucide-react'
 import { ChecklistItem, FamilyInfo } from '@/types'
 
 interface ChecklistSectionProps {
@@ -16,6 +17,20 @@ interface ChecklistSectionProps {
 }
 
 export default function ChecklistSection({ checklistItems, onUpdateItem, familyInfo, metricsSettings }: ChecklistSectionProps) {
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<number>>(new Set())
+
+  const toggleCategory = (categoryId: number) => {
+    setCollapsedCategories(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId)
+      } else {
+        newSet.add(categoryId)
+      }
+      return newSet
+    })
+  }
+
   const getCategoryProgress = (category: ChecklistItem) => {
     const totalItems = category.items.length
     const completedItems = category.items.filter(item => item.completed).length
