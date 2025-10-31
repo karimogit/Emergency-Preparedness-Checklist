@@ -11,6 +11,45 @@
   html.dark {
     color-scheme: dark;
   }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+
+  html.dark body {
+    @apply bg-gray-950 text-gray-100;
+  }
+
+  html.dark .text-gray-900,
+  html.dark .text-gray-800 {
+    @apply text-gray-100;
+  }
+
+  html.dark .text-gray-700 {
+    @apply text-gray-200;
+  }
+
+  html.dark .text-gray-600 {
+    @apply text-gray-300;
+  }
+
+  html.dark .text-gray-500 {
+    @apply text-gray-400;
+  }
+
+  html.dark .text-gray-400 {
+    @apply text-gray-300;
+  }
+
+  html.dark .text-brown-900,
+  html.dark .text-brown-800 {
+    @apply text-brown-200;
+  }
+
+  html.dark .text-brown-700,
+  html.dark .text-brown-600 {
+    @apply text-brown-300;
+  }
 }
 
 @layer components {
