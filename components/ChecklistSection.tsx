@@ -123,65 +123,68 @@ export default function ChecklistSection({ checklistItems, onUpdateItem, familyI
         </div>
       </div>
 
-      {/* Checklist Items */}
-      {selectedCategory === null ? (
-        <div className="space-y-6">
-          {checklistItems.map((category) => {
-            const progress = getCategoryProgress(category)
-            return (
-              <div key={category.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
-                <div className="bg-gradient-to-r from-brown-50 to-brown-100 px-6 py-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">{category.category}</h3>
-                    <span className="text-sm text-gray-600">{progress.completedItems}/{progress.totalItems} completed</span>
+        {/* Checklist Items */}
+        {selectedCategory === null ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {checklistItems.map((category) => {
+              const progress = getCategoryProgress(category)
+              return (
+                <div
+                  key={category.id}
+                  className="flex flex-col border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm h-[420px]"
+                >
+                  <div className="bg-gradient-to-r from-brown-50 to-brown-100 px-6 py-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">{category.category}</h3>
+                      <span className="text-sm text-gray-600">{progress.completedItems}/{progress.totalItems} completed</span>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-brown-500 to-brown-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-brown-500 to-brown-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${progress.percentage}%` }}
-                      ></div>
+
+                  <div className="flex-1 p-6 overflow-y-auto">
+                    <div className="space-y-3 pr-2">
+                      {category.items.map((item) => {
+                        const displayText = convertWaterText(item.text)
+                        
+                        return (
+                          <div 
+                            key={item.id} 
+                            className={`checklist-item ${item.completed ? 'completed' : ''}`}
+                          >
+                            <button
+                              onClick={() => onUpdateItem(category.id, item.id, !item.completed)}
+                              className="flex-shrink-0"
+                            >
+                              {item.completed ? (
+                                <CheckCircle className="h-6 w-6 text-brown-600" />
+                              ) : (
+                                <Circle className="h-6 w-6 text-gray-400 hover:text-brown-500" />
+                              )}
+                            </button>
+                            
+                            <div className="flex-1 min-w-0">
+                              <p className={`item-text text-sm font-medium ${item.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                                {displayText}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
-
-                <div className="p-6">
-                  <div className="space-y-3">
-                    {category.items.map((item) => {
-                      const displayText = convertWaterText(item.text)
-                      
-                      return (
-                        <div 
-                          key={item.id} 
-                          className={`checklist-item ${item.completed ? 'completed' : ''}`}
-                        >
-                          <button
-                            onClick={() => onUpdateItem(category.id, item.id, !item.completed)}
-                            className="flex-shrink-0"
-                          >
-                            {item.completed ? (
-                              <CheckCircle className="h-6 w-6 text-brown-600" />
-                            ) : (
-                              <Circle className="h-6 w-6 text-gray-400 hover:text-brown-500" />
-                            )}
-                          </button>
-                          
-                          <div className="flex-1 min-w-0">
-                            <p className={`item-text text-sm font-medium ${item.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                              {displayText}
-                            </p>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      ) : (
+              )
+            })}
+          </div>
+        ) : (
         <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
           {(() => {
             const category = checklistItems.find(cat => cat.id === selectedCategory)
