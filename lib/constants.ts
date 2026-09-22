@@ -97,8 +97,8 @@ export const PANTRY_CATEGORY_COLORS: Record<PantryCategory | 'default', string> 
   'Condiments': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700',
   'Baking Supplies': 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 border-pink-200 dark:border-pink-700',
   'Frozen Foods': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200 border-cyan-200 dark:border-cyan-700',
-  'Other': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600',
-  'default': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+  'Other': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600',
+  'default': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 export const CONTACT_RELATIONSHIP_COLORS: Record<string, string> = {
@@ -110,7 +110,7 @@ export const CONTACT_RELATIONSHIP_COLORS: Record<string, string> = {
   'Utilities': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700',
   'Family': 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 border-pink-200 dark:border-pink-700',
   'Friend': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200 border-cyan-200 dark:border-cyan-700',
-  'default': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+  'default': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 export const BOOK_CATEGORY_COLORS: Record<string, string> = {
@@ -122,8 +122,8 @@ export const BOOK_CATEGORY_COLORS: Record<string, string> = {
   'Navigation': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700',
   'Self-Defense': 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 border-pink-200 dark:border-pink-700',
   'Communication': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200 border-cyan-200 dark:border-cyan-700',
-  'Other': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600',
-  'default': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+  'Other': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600',
+  'default': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 export const DOCUMENT_CATEGORY_COLORS: Record<string, string> = {
@@ -134,8 +134,8 @@ export const DOCUMENT_CATEGORY_COLORS: Record<string, string> = {
   'Legal': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700',
   'Property': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700',
   'Education': 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 border-pink-200 dark:border-pink-700',
-  'Other': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600',
-  'default': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+  'Other': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600',
+  'default': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 export const HAM_LOCATION_COLORS: Record<string, string> = {
@@ -143,8 +143,8 @@ export const HAM_LOCATION_COLORS: Record<string, string> = {
   'Local Repeater': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700',
   'Long Distance': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700',
   'Weather': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700',
-  'Other': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600',
-  'default': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+  'Other': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600',
+  'default': 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 // Storage Keys
