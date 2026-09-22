@@ -5,15 +5,16 @@
 
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Shield, Users, BookOpen, Radio, FileText, Download, Menu, X, Compass, Zap, MapPin } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { Shield, Menu, X, Zap } from 'lucide-react'
 import ChecklistSection from '@/components/ChecklistSection'
 import PantryManager from '@/components/PantryManager'
 import BooksManager from '@/components/BooksManager'
 import EmergencyContacts from '@/components/EmergencyContacts'
 import HamRadioFrequencies from '@/components/HamRadioFrequencies'
 import DocumentsBinder from '@/components/DocumentsBinder'
-import ImportExportManager from '@/components/ImportExportManager'
+import AppSidebar, { isSettingsTab } from '@/components/AppSidebar'
+import SettingsContent from '@/components/SettingsContent'
 import ThemeToggle from '@/components/ThemeToggle'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ToastProvider } from '@/components/Toast'
@@ -22,7 +23,6 @@ import { FamilyInfo, ChecklistItem } from '@/types'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { STORAGE_KEYS, APP_CONFIG } from '@/lib/constants'
-import { calculateProgress } from '@/lib/utils'
 import { DEFAULT_CHECKLIST } from '@/lib/defaultData'
 
 /**
@@ -35,29 +35,9 @@ function HomeContent() {
     DEFAULT_CHECKLIST
   )
   const [activeTab, setActiveTab] = useState('checklist')
-  const [isEditingFamily, setIsEditingFamily] = useState(false)
-  const [isEditingMetrics, setIsEditingMetrics] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useLocalStorage(STORAGE_KEYS.SIDEBAR_OPEN, true)
+  const [isSettingsExpanded, setIsSettingsExpanded] = useState(false)
 
-  // Memoized progress calculation
-  const stats = useMemo(() => {
-    const totalItems = checklistItems.reduce((acc, category) => acc + category.items.length, 0)
-    const completedItems = checklistItems.reduce((acc, category) => 
-      acc + category.items.filter(item => item.completed).length, 0
-    )
-    const percentage = calculateProgress(completedItems, totalItems)
-    
-    return { totalItems, completedItems, percentage }
-  }, [checklistItems])
-
-  // Memoized total family members
-  const household = useMemo(() => {
-    const people = (Number(familyInfo.adults) || 0) + (Number(familyInfo.children) || 0)
-    const pets = Number(familyInfo.pets) || 0
-    return { people, pets }
-  }, [familyInfo])
-
-  // Optimized checklist update with useCallback
   const updateChecklistItem = useCallback((categoryId: number, itemId: string, completed: boolean) => {
     setChecklistItems(prev => prev.map(category => {
       if (category.id === categoryId) {
@@ -72,7 +52,6 @@ function HomeContent() {
     }))
   }, [setChecklistItems])
 
-  // Optimized family info update. Counts stay inside the planner's supported range.
   const updateFamilyInfo = useCallback((field: keyof FamilyInfo, value: string | number) => {
     setFamilyInfo(prev => {
       if (field === 'adults' || field === 'children' || field === 'pets') {
@@ -91,19 +70,37 @@ function HomeContent() {
     })))
   }, [setChecklistItems])
 
-  // Optimized metrics update
   const updateMetricsSettings = useCallback((field: string, value: string) => {
     setMetricsSettings(prev => ({ ...prev, [field]: value }))
   }, [setMetricsSettings])
 
-  // Close sidebar on tab change for mobile
-  const handleTabChange = useCallback((tabId: string) => {
+  const handleNavigate = useCallback((tabId: string) => {
     setActiveTab(tabId)
-    setIsSidebarOpen(false)
+    if (isSettingsTab(tabId)) {
+      setIsSettingsExpanded(true)
+    }
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      setIsSidebarOpen(false)
+    }
+  }, [setIsSidebarOpen])
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen(prev => !prev)
+  }, [setIsSidebarOpen])
+
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen])
+
+  const toggleSettings = useCallback(() => {
+    setIsSettingsExpanded(prev => !prev)
   }, [])
 
-  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
   useEscapeKey(isSidebarOpen, closeSidebar)
+
+  useEffect(() => {
+    if (isSettingsTab(activeTab)) {
+      setIsSettingsExpanded(true)
+    }
+  }, [activeTab])
 
   useEffect(() => {
     if (!isSidebarOpen || window.matchMedia('(min-width: 1024px)').matches) return
@@ -114,17 +111,6 @@ function HomeContent() {
     }
   }, [isSidebarOpen])
 
-  const tabs = [
-    { id: 'checklist', label: 'Checklist', icon: Shield },
-    { id: 'pantry', label: 'Pantry', icon: Compass },
-    { id: 'books', label: 'Books', icon: BookOpen },
-    { id: 'contacts', label: 'Contacts', icon: Users },
-    { id: 'radio', label: 'HAM Radio', icon: Radio },
-    { id: 'documents', label: 'Documents', icon: FileText },
-    { id: 'export', label: 'Data', icon: Download },
-  ]
-
-  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -143,16 +129,16 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <header className="header sticky top-0 z-30 no-print" role="banner">
         <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden p-2.5 rounded-xl bg-sand-100 dark:bg-forest-800 hover:bg-sand-200 dark:hover:bg-forest-700 transition-colors focus:outline-none focus:ring-2 focus:ring-forest-500"
-                aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                onClick={toggleSidebar}
+                className="p-2.5 rounded-xl bg-sand-100 dark:bg-forest-800 hover:bg-sand-200 dark:hover:bg-forest-700 transition-colors focus:outline-none focus:ring-2 focus:ring-forest-500"
+                aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isSidebarOpen}
+                aria-controls="main-navigation"
               >
                 {isSidebarOpen ? (
                   <X className="h-5 w-5 text-forest-700 dark:text-sand-300" aria-hidden="true" />
@@ -188,361 +174,53 @@ function HomeContent() {
         </div>
       </header>
 
-      {/* Two Column Layout */}
-      <div className="flex">
-        {/* Sidebar - 20% */}
-        <aside 
-          className={`${isSidebarOpen ? 'fixed inset-0 z-40 lg:static lg:inset-auto' : 'hidden'} lg:block lg:w-1/5 lg:min-h-[calc(100vh-73px)] no-print`}
-          aria-label="Sidebar"
-        >
-          {/* Mobile backdrop */}
-          {isSidebarOpen && (
-            <div 
-              className="absolute inset-0 bg-forest-950/60 backdrop-blur-sm lg:hidden"
-              onClick={closeSidebar}
-              aria-hidden="true"
-            />
-          )}
-          
-          <div className="absolute inset-y-0 left-0 z-10 w-[min(100%,20rem)] overflow-y-auto bg-white p-5 shadow-xl dark:bg-forest-900 sidebar lg:static lg:h-full lg:w-full lg:shadow-none lg:min-h-[calc(100vh-73px)]">
-            <div className="mb-4 flex items-center justify-between lg:hidden">
-              <span className="text-sm font-bold uppercase tracking-wider text-forest-900 dark:text-sand-50">Household</span>
-              <button
-                onClick={closeSidebar}
-                className="rounded-xl p-2 text-forest-700 hover:bg-sand-100 focus:outline-none focus:ring-2 focus:ring-forest-500 dark:text-sand-300 dark:hover:bg-forest-800"
-                aria-label="Close sidebar"
-              >
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-            {/* Family Info Section */}
-            <div className="tactical-card p-5 mb-4 animate-fade-in-up stagger-1">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-forest-600 dark:text-forest-400" />
-                  <h3 className="text-sm font-bold text-forest-900 dark:text-sand-50 uppercase tracking-wider">Family</h3>
-                </div>
-                <button
-                  onClick={() => setIsEditingFamily(!isEditingFamily)}
-                  className="text-xs font-medium text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors focus:outline-none focus:underline"
-                  aria-label={isEditingFamily ? 'Save family information' : 'Edit family information'}
-                >
-                  {isEditingFamily ? 'Save' : 'Edit'}
-                </button>
-              </div>
+      <AppSidebar
+        isOpen={isSidebarOpen}
+        activeTab={activeTab}
+        isSettingsExpanded={isSettingsExpanded}
+        onToggleSettings={toggleSettings}
+        onNavigate={handleNavigate}
+        onClose={closeSidebar}
+      />
 
-              {isEditingFamily ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="min-w-0">
-                      <label htmlFor="adults" className="block text-[10px] font-medium text-sand-500 dark:text-sand-400 mb-1 truncate">Adults</label>
-                      <input
-                        id="adults"
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={familyInfo.adults}
-                        onChange={(e) => updateFamilyInfo('adults', parseInt(e.target.value) || 0)}
-                        className="input-field text-center text-sm py-2"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <label htmlFor="children" className="block text-[10px] font-medium text-sand-500 dark:text-sand-400 mb-1 truncate">Children</label>
-                      <input
-                        id="children"
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={familyInfo.children}
-                        onChange={(e) => updateFamilyInfo('children', parseInt(e.target.value) || 0)}
-                        className="input-field text-center text-sm py-2"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <label htmlFor="pets" className="block text-[10px] font-medium text-sand-500 dark:text-sand-400 mb-1 truncate">Pets</label>
-                      <input
-                        id="pets"
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={familyInfo.pets}
-                        onChange={(e) => updateFamilyInfo('pets', parseInt(e.target.value) || 0)}
-                        className="input-field text-center text-sm py-2"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="location" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Meeting place</label>
-                    <input
-                      id="location"
-                      type="text"
-                      value={familyInfo.location ?? ''}
-                      onChange={(e) => updateFamilyInfo('location', e.target.value)}
-                      placeholder="Home, school, or rally point"
-                      className="input-field text-sm py-2"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="specialNeeds" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Special needs</label>
-                    <textarea
-                      id="specialNeeds"
-                      value={familyInfo.specialNeeds ?? ''}
-                      onChange={(e) => updateFamilyInfo('specialNeeds', e.target.value)}
-                      placeholder="Medications, mobility, allergies"
-                      rows={2}
-                      className="input-field resize-none text-sm py-2"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="emergencyPlan" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Plan notes</label>
-                    <textarea
-                      id="emergencyPlan"
-                      value={familyInfo.emergencyPlan ?? ''}
-                      onChange={(e) => updateFamilyInfo('emergencyPlan', e.target.value)}
-                      placeholder="Out-of-town contact, evacuation route"
-                      rows={3}
-                      className="input-field resize-none text-sm py-2"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setIsEditingFamily(false)}
-                    className="btn-primary w-full text-sm"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    {[
-                      { label: 'Adults', value: familyInfo.adults },
-                      { label: 'Children', value: familyInfo.children },
-                      { label: 'Pets', value: familyInfo.pets },
-                    ].map((item, i) => (
-                      <div key={item.label} className={`p-2 rounded-lg bg-sand-50 dark:bg-forest-800/50 border border-sand-200 dark:border-forest-700 animate-scale-in stagger-${i + 1} min-w-0`}>
-                        <div className="text-xl font-bold text-forest-600 dark:text-forest-400">{item.value}</div>
-                        <div className="text-[9px] font-medium tracking-tight text-sand-500 dark:text-sand-400 uppercase">{item.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-sand-200 dark:border-forest-700 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-forest-100 dark:bg-forest-800 border border-forest-200 dark:border-forest-700">
-                      <span className="text-sm font-bold text-forest-700 dark:text-forest-300">
-                        {household.people} people{household.pets > 0 ? ` · ${household.pets} pets` : ''}
-                      </span>
-                    </div>
-                  </div>
-                  {(familyInfo.location || familyInfo.specialNeeds || familyInfo.emergencyPlan) && (
-                    <div className="mt-4 space-y-2 text-left">
-                      {familyInfo.location && (
-                        <p className="flex items-start gap-2 text-xs text-sand-600 dark:text-sand-300">
-                          <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-forest-500" aria-hidden="true" />
-                          <span>{familyInfo.location}</span>
-                        </p>
-                      )}
-                      {familyInfo.specialNeeds && (
-                        <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-300">
-                          <span className="font-semibold text-forest-700 dark:text-forest-300">Needs: </span>
-                          {familyInfo.specialNeeds}
-                        </p>
-                      )}
-                      {familyInfo.emergencyPlan && (
-                        <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-300">
-                          <span className="font-semibold text-forest-700 dark:text-forest-300">Plan: </span>
-                          {familyInfo.emergencyPlan}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Metrics Settings Section */}
-            <div className="tactical-card p-5 mb-4 animate-fade-in-up stagger-2">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Compass className="h-4 w-4 text-forest-600 dark:text-forest-400" />
-                  <h3 className="text-sm font-bold text-forest-900 dark:text-sand-50 uppercase tracking-wider">Units</h3>
-                </div>
-                <button
-                  onClick={() => setIsEditingMetrics(!isEditingMetrics)}
-                  className="text-xs font-medium text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors focus:outline-none focus:underline"
-                  aria-label={isEditingMetrics ? 'Save unit settings' : 'Edit unit settings'}
-                >
-                  {isEditingMetrics ? 'Done' : 'Edit'}
-                </button>
-              </div>
-
-              {isEditingMetrics ? (
-                <div className="space-y-3">
-                  <div>
-                    <label htmlFor="volume" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Volume</label>
-                    <select
-                      id="volume"
-                      value={metricsSettings.volume}
-                      onChange={(e) => updateMetricsSettings('volume', e.target.value)}
-                      className="select-field text-sm"
-                    >
-                      <option value="gallons">Gallons</option>
-                      <option value="liters">Liters</option>
-                      <option value="quarts">Quarts</option>
-                    </select>
-                    <p className="mt-1.5 text-[11px] leading-snug text-sand-500 dark:text-sand-400">
-                      Checklist water targets and tips use this unit.
-                    </p>
-                  </div>
-                  <div>
-                    <label htmlFor="weight" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Weight</label>
-                    <select
-                      id="weight"
-                      value={metricsSettings.weight}
-                      onChange={(e) => updateMetricsSettings('weight', e.target.value)}
-                      className="select-field text-sm"
-                    >
-                      <option value="pounds">Pounds</option>
-                      <option value="kilograms">Kilograms</option>
-                      <option value="ounces">Ounces</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="temperature" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Temperature</label>
-                    <select
-                      id="temperature"
-                      value={metricsSettings.temperature}
-                      onChange={(e) => updateMetricsSettings('temperature', e.target.value)}
-                      className="select-field text-sm"
-                    >
-                      <option value="fahrenheit">Fahrenheit</option>
-                      <option value="celsius">Celsius</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="distance" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Distance</label>
-                    <select
-                      id="distance"
-                      value={metricsSettings.distance}
-                      onChange={(e) => updateMetricsSettings('distance', e.target.value)}
-                      className="select-field text-sm"
-                    >
-                      <option value="miles">Miles</option>
-                      <option value="kilometers">Kilometers</option>
-                      <option value="feet">Feet</option>
-                    </select>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {[
-                    { label: 'Volume', value: metricsSettings.volume },
-                    { label: 'Weight', value: metricsSettings.weight },
-                    { label: 'Temp', value: metricsSettings.temperature },
-                    { label: 'Distance', value: metricsSettings.distance },
-                  ].map((item) => (
-                    <div key={item.label} className="flex justify-between items-center py-2 px-3 rounded-lg bg-sand-50 dark:bg-forest-800/50">
-                      <span className="text-xs font-medium text-sand-500 dark:text-sand-400 uppercase tracking-wide">{item.label}</span>
-                      <span className="text-sm font-semibold text-forest-700 dark:text-forest-300 capitalize">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Progress Bar */}
-            <div className="tactical-card p-5 animate-fade-in-up stagger-3">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-forest-900 dark:text-sand-50 uppercase tracking-wider">Overall Progress</span>
-                <span className="text-lg font-bold text-forest-600 dark:text-forest-400">{stats.percentage}%</span>
-              </div>
-              <div className="progress-bar mb-3">
-                <div 
-                  className="progress-bar-fill"
-                  style={{ width: `${stats.percentage}%` }}
-                  role="progressbar"
-                  aria-valuenow={stats.percentage}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`${stats.percentage}% complete`}
-                />
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-sand-500 dark:text-sand-400">
-                  <span className="font-semibold text-forest-600 dark:text-forest-400">{stats.completedItems}</span> of {stats.totalItems} items
-                </span>
-                <span className="text-amber-600 dark:text-amber-400 font-medium">
-                  {stats.totalItems - stats.completedItems} left
-                </span>
-              </div>
-            </div>
+      <main
+        className={`min-h-[calc(100vh-73px)] transition-[margin] duration-300 ease-in-out ${
+          isSidebarOpen ? 'lg:ml-64' : ''
+        }`}
+        id="main-content"
+      >
+        <div className="p-4 sm:p-6">
+          <div className="tactical-card animate-fade-in-up">
+            {activeTab === 'checklist' && (
+              <ChecklistSection 
+                checklistItems={checklistItems}
+                onUpdateItem={updateChecklistItem}
+                onReset={resetChecklist}
+                familyInfo={familyInfo}
+                metricsSettings={metricsSettings}
+              />
+            )}
+            {activeTab === 'pantry' && <PantryManager metricsSettings={metricsSettings} />}
+            {activeTab === 'books' && <BooksManager />}
+            {activeTab === 'contacts' && <EmergencyContacts />}
+            {activeTab === 'radio' && <HamRadioFrequencies />}
+            {activeTab === 'documents' && <DocumentsBinder />}
+            {isSettingsTab(activeTab) && (
+              <SettingsContent
+                activeSettingsTab={activeTab}
+                familyInfo={familyInfo}
+                onUpdateFamilyInfo={updateFamilyInfo}
+                checklistItems={checklistItems}
+                metricsSettings={metricsSettings}
+                onUpdateMetrics={updateMetricsSettings}
+              />
+            )}
           </div>
-        </aside>
+        </div>
+      </main>
 
-        {/* Main Content - 80% */}
-        <main className="w-full lg:w-4/5">
-          <div className="p-4 sm:p-6">
-            {/* Navigation Tabs */}
-            <nav className="tactical-card mb-6 no-print animate-fade-in-down" aria-label="Main navigation">
-              <div className="tab-strip border-b border-sand-200 dark:border-forest-700">
-                <div className="flex gap-4 px-4 overflow-x-auto scrollbar-none" role="tablist">
-                  {tabs.map((tab, index) => {
-                    const Icon = tab.icon
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => handleTabChange(tab.id)}
-                        role="tab"
-                        aria-selected={activeTab === tab.id}
-                        aria-controls={`${tab.id}-panel`}
-                        id={`${tab.id}-tab`}
-                        className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <Icon className="h-4 w-4" aria-hidden="true" />
-                        <span>{tab.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </nav>
-
-            {/* Tab Content */}
-            <div 
-              className="tactical-card animate-fade-in-up"
-              role="tabpanel"
-              id={`${activeTab}-panel`}
-              aria-labelledby={`${activeTab}-tab`}
-            >
-              {activeTab === 'checklist' && (
-                <ChecklistSection 
-                  checklistItems={checklistItems}
-                  onUpdateItem={updateChecklistItem}
-                  onReset={resetChecklist}
-                  familyInfo={familyInfo}
-                  metricsSettings={metricsSettings}
-                />
-              )}
-              {activeTab === 'pantry' && <PantryManager metricsSettings={metricsSettings} />}
-              {activeTab === 'books' && <BooksManager />}
-              {activeTab === 'contacts' && <EmergencyContacts />}
-              {activeTab === 'radio' && <HamRadioFrequencies />}
-              {activeTab === 'documents' && <DocumentsBinder />}
-              {activeTab === 'export' && (
-                <ImportExportManager 
-                  familyInfo={familyInfo}
-                  checklistItems={checklistItems}
-                  metricsSettings={metricsSettings}
-                />
-              )}
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {/* Notion Template Promotion */}
-      <footer className="mt-8 p-4 sm:p-6 no-print">
-        <div className="max-w-7xl mx-auto lg:ml-[20%] lg:max-w-none lg:pr-6">
+      <footer className={`mt-8 p-4 sm:p-6 no-print transition-[margin] duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
+        <div className="max-w-7xl mx-auto">
           <div className="notion-promo">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center space-x-5">
@@ -577,9 +255,6 @@ function HomeContent() {
   )
 }
 
-/**
- * Main export wrapped with providers and error boundary
- */
 export default function Home() {
   return (
     <ErrorBoundary>

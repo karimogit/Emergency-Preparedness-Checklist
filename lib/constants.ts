@@ -12,7 +12,9 @@ import type {
   VolumeUnit,
   WeightUnit,
   TemperatureUnit,
-  DistanceUnit
+  DistanceUnit,
+  FontSize,
+  FontFamilyChoice
 } from '@/types'
 
 // Pantry Categories
@@ -88,6 +90,19 @@ export const WEIGHT_UNITS: readonly WeightUnit[] = ['pounds', 'kilograms', 'ounc
 export const TEMPERATURE_UNITS: readonly TemperatureUnit[] = ['fahrenheit', 'celsius'] as const
 export const DISTANCE_UNITS: readonly DistanceUnit[] = ['miles', 'kilometers', 'feet'] as const
 
+export const FONT_SIZES: readonly FontSize[] = ['sm', 'md', 'lg', 'xl'] as const
+export const FONT_SIZE_LABELS: Record<FontSize, string> = {
+  sm: 'Small',
+  md: 'Medium',
+  lg: 'Large',
+  xl: 'Extra Large',
+}
+export const FONT_FAMILIES: readonly FontFamilyChoice[] = ['sans', 'serif'] as const
+export const FONT_FAMILY_LABELS: Record<FontFamilyChoice, string> = {
+  sans: 'Outfit (Sans)',
+  serif: 'Source Serif (Serif)',
+}
+
 // Color Mappings
 export const PANTRY_CATEGORY_COLORS: Record<PantryCategory | 'default', string> = {
   'Canned Goods': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700',
@@ -157,7 +172,9 @@ export const STORAGE_KEYS = {
   EMERGENCY_CONTACTS: 'emergencyContacts',
   HAM_FREQUENCIES: 'frequencies',
   DOCUMENTS: 'documents',
-  THEME: 'theme'
+  THEME: 'theme',
+  DISPLAY_SETTINGS: 'displaySettings',
+  SIDEBAR_OPEN: 'sidebarOpen',
 } as const
 
 // Expiry Status Thresholds

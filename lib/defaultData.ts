@@ -37,6 +37,11 @@ export const DEFAULT_METRICS_SETTINGS = {
   distance: 'miles' as const
 }
 
+export const DEFAULT_DISPLAY_SETTINGS = {
+  fontSize: 'md' as const,
+  fontFamily: 'sans' as const,
+}
+
 /**
  * Default Checklist Items
  */

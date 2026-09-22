@@ -7,9 +7,9 @@
 
 import { createContext, useContext, ReactNode, useState, useEffect, useMemo } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { FamilyInfo, MetricsSettings, Theme } from '@/types'
+import { DisplaySettings, FamilyInfo, MetricsSettings, Theme } from '@/types'
 import { STORAGE_KEYS } from '@/lib/constants'
-import { DEFAULT_FAMILY_INFO, DEFAULT_METRICS_SETTINGS } from '@/lib/defaultData'
+import { DEFAULT_DISPLAY_SETTINGS, DEFAULT_FAMILY_INFO, DEFAULT_METRICS_SETTINGS } from '@/lib/defaultData'
 
 interface AppContextType {
   theme: Theme
@@ -19,6 +19,8 @@ interface AppContextType {
   setFamilyInfo: (info: FamilyInfo | ((prev: FamilyInfo) => FamilyInfo)) => void
   metricsSettings: MetricsSettings
   setMetricsSettings: (settings: MetricsSettings | ((prev: MetricsSettings) => MetricsSettings)) => void
+  displaySettings: DisplaySettings
+  setDisplaySettings: (settings: DisplaySettings | ((prev: DisplaySettings) => DisplaySettings)) => void
   isLoading: boolean
 }
 
@@ -39,11 +41,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     STORAGE_KEYS.METRICS_SETTINGS,
     DEFAULT_METRICS_SETTINGS
   )
+  const [displaySettings, setDisplaySettings] = useLocalStorage<DisplaySettings>(
+    STORAGE_KEYS.DISPLAY_SETTINGS,
+    DEFAULT_DISPLAY_SETTINGS
+  )
 
   // Older saves may lack temperature/distance; keep volume/weight and fill the rest.
   const normalizedMetrics: MetricsSettings = {
     ...DEFAULT_METRICS_SETTINGS,
     ...metricsSettings,
+  }
+
+  const normalizedDisplay: DisplaySettings = {
+    ...DEFAULT_DISPLAY_SETTINGS,
+    ...displaySettings,
   }
 
   useEffect(() => {
@@ -63,6 +74,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.colorScheme = resolvedTheme
   }, [resolvedTheme])
 
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.fontSize = normalizedDisplay.fontSize
+    root.dataset.fontFamily = normalizedDisplay.fontFamily
+  }, [normalizedDisplay.fontSize, normalizedDisplay.fontFamily])
+
   // Handle initial loading state
   useEffect(() => {
     setIsLoading(false)
@@ -76,8 +93,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFamilyInfo,
     metricsSettings: normalizedMetrics,
     setMetricsSettings,
+    displaySettings: normalizedDisplay,
+    setDisplaySettings,
     isLoading
-  }), [theme, resolvedTheme, setTheme, familyInfo, setFamilyInfo, normalizedMetrics, setMetricsSettings, isLoading])
+  }), [theme, resolvedTheme, setTheme, familyInfo, setFamilyInfo, normalizedMetrics, setMetricsSettings, normalizedDisplay, setDisplaySettings, isLoading])
 
   return (
     <AppContext.Provider value={value}>

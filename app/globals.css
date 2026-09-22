@@ -6,6 +6,31 @@
   html {
     font-family: var(--font-outfit), system-ui, sans-serif;
     scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  html[data-font-size='sm'] {
+    font-size: 14px;
+  }
+
+  html[data-font-size='md'] {
+    font-size: 16px;
+  }
+
+  html[data-font-size='lg'] {
+    font-size: 18px;
+  }
+
+  html[data-font-size='xl'] {
+    font-size: 20px;
+  }
+
+  html[data-font-family='serif'] {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+
+  html[data-font-family='sans'] {
+    font-family: var(--font-outfit), system-ui, sans-serif;
   }
   
   /* Dark mode color scheme */
@@ -319,6 +344,31 @@
     @apply bg-white dark:bg-forest-900;
     @apply border-r border-sand-200 dark:border-forest-700;
     @apply bg-tactical-pattern;
+  }
+
+  .sidebar-nav-item {
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium;
+    @apply text-sand-600 dark:text-sand-300;
+    @apply transition-colors duration-150;
+    @apply hover:bg-sand-100 dark:hover:bg-forest-800;
+    @apply focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-inset;
+  }
+
+  .sidebar-nav-item.active {
+    @apply bg-forest-100 dark:bg-forest-800/80 text-forest-800 dark:text-forest-200;
+    @apply border border-forest-200 dark:border-forest-700;
+  }
+
+  .sidebar-nav-subitem {
+    @apply flex w-full items-center gap-2 rounded-lg px-3 py-2 pl-9 text-sm;
+    @apply text-sand-500 dark:text-sand-400;
+    @apply transition-colors duration-150;
+    @apply hover:bg-sand-100 dark:hover:bg-forest-800 hover:text-forest-700 dark:hover:text-sand-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-inset;
+  }
+
+  .sidebar-nav-subitem.active {
+    @apply bg-forest-50 dark:bg-forest-800/60 text-forest-700 dark:text-forest-300 font-medium;
   }
 
   /* Header styling */
