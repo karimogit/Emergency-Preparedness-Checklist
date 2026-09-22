@@ -83,7 +83,7 @@
   .checklist-item {
     @apply flex items-start gap-3 p-3 rounded-xl;
     @apply bg-sand-50 dark:bg-forest-950/40;
-    @apply border border-sand-300 dark:border-forest-600;
+    @apply border border-sand-400 dark:border-forest-500;
     @apply transition-all duration-200;
     @apply hover:border-forest-400 dark:hover:border-forest-400;
     @apply hover:shadow-sm hover:bg-white dark:hover:bg-forest-800/70;
