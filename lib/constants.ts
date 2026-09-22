@@ -157,7 +157,8 @@ export const STORAGE_KEYS = {
   EMERGENCY_CONTACTS: 'emergencyContacts',
   HAM_FREQUENCIES: 'frequencies',
   DOCUMENTS: 'documents',
-  THEME: 'theme'
+  THEME: 'theme',
+  SIDEBAR_COLLAPSED: 'sidebarCollapsed'
 } as const
 
 // Expiry Status Thresholds
