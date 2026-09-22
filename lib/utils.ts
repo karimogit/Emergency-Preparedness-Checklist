@@ -135,13 +135,56 @@ export function getSupplyTargets(
 }
 
 export function formatSupplyWater(targets: SupplyTargets, unit: VolumeUnit): string {
-  if (unit === 'liters') return `${targets.waterLiters} liters`
-  if (unit === 'quarts') return `${targets.waterQuarts} quarts`
-  return `${targets.waterGallons} gallons`
+  if (unit === 'liters') return `${targets.waterLiters} ${pluralize('liter', targets.waterLiters)}`
+  if (unit === 'quarts') return `${targets.waterQuarts} ${pluralize('quart', targets.waterQuarts)}`
+  return `${targets.waterGallons} ${pluralize('gallon', targets.waterGallons)}`
+}
+
+/** Daily drinking-water rate in the user's preferred volume unit (FEMA: 1 gallon / person / day). */
+export function formatDailyWaterRate(unit: VolumeUnit): string {
+  if (unit === 'liters') return `about 3.8 ${pluralize('liter', 3.8)}`
+  if (unit === 'quarts') return `4 ${pluralize('quart', 4)}`
+  return `1 ${pluralize('gallon', 1)}`
+}
+
+export function volumeUnitLabel(unit: VolumeUnit, count = 2): string {
+  if (unit === 'liters') return pluralize('liter', count)
+  if (unit === 'quarts') return pluralize('quart', count)
+  return pluralize('gallon', count)
 }
 
 function roundQuantity(value: number): number {
   return Math.round(value * 10) / 10
+}
+
+/**
+ * Rewrite checklist / tip copy so volume words and amounts match the preferred unit.
+ * Source text is assumed to be written in US gallons (FEMA baseline).
+ */
+export function localizeVolumeText(text: string, toUnit: VolumeUnit): string {
+  if (!text || toUnit === 'gallons') return text
+
+  const factor = toUnit === 'liters' ? 3.785411784 : 4
+  const singular = toUnit === 'liters' ? 'liter' : 'quart'
+  const plural = toUnit === 'liters' ? 'liters' : 'quarts'
+
+  return text.replace(
+    /(\d+(?:\.\d+)?)\s*(gallons?)/gi,
+    (_match, rawAmount: string) => {
+      const amount = Number(rawAmount)
+      if (!Number.isFinite(amount)) return _match
+      const converted = roundQuantity(amount * factor)
+      return `${converted} ${converted === 1 ? singular : plural}`
+    }
+  ).replace(/\bgallons\b/gi, plural).replace(/\bgallon\b/gi, singular)
+}
+
+/** @deprecated Use localizeVolumeText */
+export function convertWaterText(text: string, toUnit: string): string {
+  if (toUnit === 'liters' || toUnit === 'quarts' || toUnit === 'gallons') {
+    return localizeVolumeText(text, toUnit)
+  }
+  return text
 }
 
 /**
@@ -261,20 +304,6 @@ export function formatBytes(bytes: number, decimals = 2): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
-}
-
-/**
- * Convert metric units
- */
-export function convertWaterText(text: string, toUnit: string): string {
-  if (text.includes('gallon') && toUnit !== 'gallons') {
-    if (toUnit === 'liters') {
-      return text.replace(/gallon/g, 'liter')
-    } else if (toUnit === 'quarts') {
-      return text.replace(/gallon/g, 'quart')
-    }
-  }
-  return text
 }
 
 /**
