@@ -201,6 +201,18 @@
     padding-right: 2.5rem;
   }
 
+  /* Tab strip: horizontally scrollable, with a soft edge hinting at more tabs */
+  .tab-strip {
+    @apply relative;
+  }
+
+  .tab-strip::after {
+    content: '';
+    @apply pointer-events-none absolute inset-y-0 right-0 w-10;
+    @apply bg-gradient-to-l from-white dark:from-forest-900 to-transparent;
+    @apply lg:hidden;
+  }
+
   /* Tab navigation */
   .nav-tab {
     @apply relative py-4 px-1 font-medium text-sm;
@@ -237,17 +249,13 @@
   }
 
   .progress-bar-fill {
-    @apply h-full rounded-full transition-all duration-700 ease-out;
+    @apply relative h-full rounded-full transition-all duration-700 ease-out;
     @apply bg-gradient-to-r from-forest-400 via-forest-500 to-forest-600;
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
   }
 
   .progress-bar-fill::after {
     content: '';
-    @apply absolute inset-0;
-    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent;
-    animation: shimmer 2s linear infinite;
+    @apply absolute inset-x-0 top-0 h-1/2 rounded-full bg-white/20;
   }
 
   /* Category pill */
@@ -353,6 +361,16 @@
 }
 
 @layer utilities {
+  /* Hide scrollbars while keeping the element scrollable */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Stagger animation delays */
   .stagger-1 { animation-delay: 0.1s; }
   .stagger-2 { animation-delay: 0.2s; }
@@ -401,6 +419,22 @@
     animation: slide-in 0.3s ease-out;
   }
   
+  /* Respect users who prefer less motion */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   /* Print styles */
   @media print {
     .no-print {
