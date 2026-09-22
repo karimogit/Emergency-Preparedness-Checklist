@@ -230,6 +230,9 @@ export default function SettingsContent({
                   <option value="liters">Liters</option>
                   <option value="quarts">Quarts</option>
                 </select>
+                <p className="mt-1.5 text-[11px] leading-snug text-sand-500 dark:text-sand-400">
+                  Checklist water targets and tips use this unit.
+                </p>
               </div>
               <div>
                 <label htmlFor="weight" className="mb-1.5 block text-xs font-medium text-sand-500 dark:text-sand-400">
@@ -406,11 +409,11 @@ export default function SettingsContent({
             />
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-sand-500 dark:text-sand-400">
-              <span className="font-semibold text-forest-600 dark:text-forest-400">{stats.completedItems}</span> of{' '}
+            <span className="text-sand-600 dark:text-sand-300">
+              <span className="font-semibold text-forest-700 dark:text-forest-300">{stats.completedItems}</span> of{' '}
               {stats.totalItems} items complete
             </span>
-            <span className="font-medium text-amber-600 dark:text-amber-400">
+            <span className="font-medium text-amber-700 dark:text-amber-400">
               {stats.totalItems - stats.completedItems} remaining
             </span>
           </div>
