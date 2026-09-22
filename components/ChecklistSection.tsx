@@ -93,18 +93,58 @@ export default function ChecklistSection({
     'Practice your emergency plan with your family regularly',
   ], [volume, dailyRate])
 
-  const getCategoryColor = (index: number) => {
-    const colors = [
-      'from-forest-500 to-forest-600',
-      'from-amber-500 to-amber-600',
-      'from-emerald-500 to-emerald-600',
-      'from-cyan-500 to-cyan-600',
-      'from-violet-500 to-violet-600',
-      'from-rose-500 to-rose-600',
-      'from-orange-500 to-orange-600',
-      'from-teal-500 to-teal-600',
+  const getCategoryTheme = (index: number) => {
+    const themes = [
+      {
+        bar: 'from-forest-500 to-emerald-600',
+        border: 'border-forest-300 dark:border-forest-500',
+        header: 'bg-forest-50 dark:bg-forest-800/80',
+        badge: 'bg-forest-100 text-forest-800 dark:bg-forest-700 dark:text-forest-100',
+      },
+      {
+        bar: 'from-amber-500 to-orange-500',
+        border: 'border-amber-300 dark:border-amber-600',
+        header: 'bg-amber-50 dark:bg-amber-950/40',
+        badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
+      },
+      {
+        bar: 'from-sky-500 to-cyan-600',
+        border: 'border-sky-300 dark:border-sky-600',
+        header: 'bg-sky-50 dark:bg-sky-950/40',
+        badge: 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
+      },
+      {
+        bar: 'from-violet-500 to-purple-600',
+        border: 'border-violet-300 dark:border-violet-600',
+        header: 'bg-violet-50 dark:bg-violet-950/40',
+        badge: 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200',
+      },
+      {
+        bar: 'from-rose-500 to-pink-600',
+        border: 'border-rose-300 dark:border-rose-600',
+        header: 'bg-rose-50 dark:bg-rose-950/40',
+        badge: 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200',
+      },
+      {
+        bar: 'from-teal-500 to-emerald-600',
+        border: 'border-teal-300 dark:border-teal-600',
+        header: 'bg-teal-50 dark:bg-teal-950/40',
+        badge: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-200',
+      },
+      {
+        bar: 'from-orange-500 to-red-500',
+        border: 'border-orange-300 dark:border-orange-600',
+        header: 'bg-orange-50 dark:bg-orange-950/40',
+        badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
+      },
+      {
+        bar: 'from-indigo-500 to-blue-600',
+        border: 'border-indigo-300 dark:border-indigo-600',
+        header: 'bg-indigo-50 dark:bg-indigo-950/40',
+        badge: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200',
+      },
     ]
-    return colors[index % colors.length]
+    return themes[index % themes.length]
   }
 
   const renderChecklistItem = (
@@ -118,13 +158,7 @@ export default function ChecklistSection({
     return (
       <li
         key={item.id}
-        className={`group flex items-start gap-3 rounded-lg transition-colors duration-200 ${
-          spacious ? 'p-4' : 'p-3'
-        } ${
-          item.completed
-            ? 'bg-forest-50/80 dark:bg-forest-900/30'
-            : 'hover:bg-sand-50/80 dark:hover:bg-forest-800/40'
-        }`}
+        className={`checklist-item group ${spacious ? 'p-4' : ''} ${item.completed ? 'completed' : ''}`}
         style={{ animationDelay: `${itemIndex * 30}ms` }}
       >
         <button
@@ -135,18 +169,18 @@ export default function ChecklistSection({
           onClick={() => onUpdateItem(categoryId, item.id, !item.completed)}
         >
           {item.completed ? (
-            <CheckCircle className={`${spacious ? 'h-6 w-6' : 'h-5 w-5'} text-forest-500 dark:text-forest-400`} aria-hidden="true" />
+            <CheckCircle className={`${spacious ? 'h-6 w-6' : 'h-5 w-5'} text-forest-600 dark:text-forest-300`} aria-hidden="true" />
           ) : (
-            <Circle className={`${spacious ? 'h-6 w-6' : 'h-5 w-5'} text-sand-300 transition-colors group-hover:text-forest-400 dark:text-forest-600`} aria-hidden="true" />
+            <Circle className={`${spacious ? 'h-6 w-6' : 'h-5 w-5'} text-sand-400 transition-colors group-hover:text-forest-500 dark:text-forest-400`} aria-hidden="true" />
           )}
         </button>
 
         <button
           type="button"
-          className={`min-w-0 flex-1 text-left text-sm leading-relaxed break-words focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-offset-2 rounded ${
+          className={`item-text min-w-0 flex-1 text-left text-sm leading-relaxed break-words focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-offset-2 rounded ${
             item.completed
-              ? 'line-through text-sand-400 dark:text-sand-600'
-              : 'text-forest-800 dark:text-sand-200'
+              ? 'text-sand-500 dark:text-sand-400'
+              : 'text-forest-900 dark:text-sand-100'
           }`}
           onClick={() => onUpdateItem(categoryId, item.id, !item.completed)}
         >
@@ -193,7 +227,7 @@ export default function ChecklistSection({
       </div>
 
       <section className="mb-8 grid gap-4 sm:grid-cols-3" aria-label="72 hour supply targets">
-        <div className="relative overflow-hidden rounded-2xl border border-forest-200/80 bg-gradient-to-br from-forest-50 via-white to-cyan-50/40 p-5 dark:border-forest-700 dark:from-forest-900/70 dark:via-forest-900/40 dark:to-forest-800/30">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-forest-300 bg-gradient-to-br from-forest-50 via-white to-cyan-50/40 p-5 dark:border-forest-500 dark:from-forest-900/70 dark:via-forest-900/40 dark:to-forest-800/30">
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-forest-400/10 blur-2xl" aria-hidden="true" />
           <div className="relative">
             <div className="mb-2 flex items-center gap-2">
@@ -209,7 +243,7 @@ export default function ChecklistSection({
             </p>
           </div>
         </div>
-        <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/90 via-white to-sand-50 p-5 dark:border-amber-900/50 dark:from-amber-950/25 dark:via-forest-900/40 dark:to-forest-900/20">
+        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/90 via-white to-sand-50 p-5 dark:border-amber-600 dark:from-amber-950/25 dark:via-forest-900/40 dark:to-forest-900/20">
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Food</p>
           <p className="mt-2 font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">
             {supplyTargets.days} days / person
@@ -218,8 +252,8 @@ export default function ChecklistSection({
             Non-perishable food for each person. Keep pet food as its own supply.
           </p>
         </div>
-        <div className="rounded-2xl border border-sand-200 bg-gradient-to-br from-sand-50 via-white to-forest-50/40 p-5 dark:border-forest-700 dark:from-forest-900/50 dark:via-forest-900/30 dark:to-forest-800/20">
-          <p className="text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400">Household</p>
+        <div className="rounded-2xl border-2 border-sky-300 bg-gradient-to-br from-sky-50 via-white to-indigo-50/40 p-5 dark:border-sky-600 dark:from-sky-950/30 dark:via-forest-900/40 dark:to-indigo-950/20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Household</p>
           <p className="mt-2 font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">{householdLabel}</p>
           <p className="mt-2 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
             Change adults, children, and pets in Settings to update these targets.
@@ -287,19 +321,20 @@ export default function ChecklistSection({
             No checklist items match “{searchTerm.trim()}”.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 rounded-2xl bg-sand-100/90 p-3 dark:bg-black/25 sm:p-4 lg:grid-cols-2">
             {visibleCategories.map((category) => {
               const source = checklistItems.find(item => item.id === category.id) ?? category
               const categoryIndex = checklistItems.findIndex(item => item.id === category.id)
               const progress = getCategoryProgress(source)
+              const theme = getCategoryTheme(categoryIndex)
               return (
                 <article
                   key={category.id}
-                  className="flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-sand-200 bg-white animate-fade-in-up dark:border-forest-700 dark:bg-forest-900 sm:min-h-[380px]"
+                  className={`flex min-h-[320px] flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-card animate-fade-in-up dark:bg-[#173017] sm:min-h-[380px] ${theme.border}`}
                   style={{ animationDelay: `${categoryIndex * 80}ms` }}
                 >
-                  <header className="relative overflow-hidden border-b border-sand-200 px-5 py-4 dark:border-forest-700">
-                    <div className={`absolute inset-0 bg-gradient-to-r ${getCategoryColor(categoryIndex)} opacity-[0.06] dark:opacity-10`} />
+                  <div className={`h-1.5 bg-gradient-to-r ${theme.bar}`} aria-hidden="true" />
+                  <header className={`relative overflow-hidden border-b px-5 py-4 ${theme.header} ${theme.border}`}>
                     <div className="relative z-10">
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <h3 className="font-serif text-lg font-semibold text-forest-950 dark:text-sand-50">
@@ -308,14 +343,14 @@ export default function ChecklistSection({
                         <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
                           progress.percentage === 100
                             ? 'bg-forest-100 text-forest-700 dark:bg-forest-800 dark:text-forest-300'
-                            : 'bg-sand-100 text-sand-600 dark:bg-forest-800 dark:text-sand-400'
+                            : theme.badge
                         }`}>
                           {progress.completedItems}/{progress.totalItems}
                         </span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-200 dark:bg-forest-700">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-forest-950/50">
                         <div
-                          className={`h-full rounded-full bg-gradient-to-r ${getCategoryColor(categoryIndex)} transition-all duration-500`}
+                          className={`h-full rounded-full bg-gradient-to-r ${theme.bar} transition-all duration-500`}
                           style={{ width: `${progress.percentage}%` }}
                           role="progressbar"
                           aria-valuenow={progress.percentage}
@@ -327,7 +362,7 @@ export default function ChecklistSection({
                   </header>
 
                   <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-                    <ul className="space-y-1">
+                    <ul className="space-y-2">
                       {category.items.map((item, itemIndex) =>
                         renderChecklistItem(category.id, item, itemIndex)
                       )}
@@ -339,32 +374,36 @@ export default function ChecklistSection({
           </div>
         )
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-sand-200 bg-white animate-fade-in dark:border-forest-700 dark:bg-forest-900">
-          {(() => {
+        (() => {
             const category = visibleCategories.find(cat => cat.id === selectedCategory)
             const source = checklistItems.find(cat => cat.id === selectedCategory)
+            const categoryIndex = checklistItems.findIndex(cat => cat.id === selectedCategory)
+            const theme = getCategoryTheme(Math.max(categoryIndex, 0))
+
             if (!category || !source) {
               return (
-                <p className="px-6 py-10 text-center text-sm text-sand-500 dark:text-sand-400">
-                  Nothing in this category matches your search.
-                </p>
+                <div className="overflow-hidden rounded-2xl border-2 border-sand-300 bg-white shadow-card animate-fade-in dark:border-forest-600 dark:bg-[#173017]">
+                  <p className="px-6 py-10 text-center text-sm text-sand-500 dark:text-sand-400">
+                    Nothing in this category matches your search.
+                  </p>
+                </div>
               )
             }
 
             const progress = getCategoryProgress(source)
-            const categoryIndex = checklistItems.findIndex(cat => cat.id === selectedCategory)
 
             return (
+              <div className={`overflow-hidden rounded-2xl border-2 bg-white shadow-card animate-fade-in dark:bg-[#173017] ${theme.border}`}>
               <article>
-                <header className="relative overflow-hidden border-b border-sand-200 px-5 py-4 dark:border-forest-700">
-                  <div className={`absolute inset-0 bg-gradient-to-r ${getCategoryColor(categoryIndex)} opacity-[0.06] dark:opacity-10`} />
+                <div className={`h-1.5 bg-gradient-to-r ${theme.bar}`} aria-hidden="true" />
+                <header className={`relative overflow-hidden border-b px-5 py-4 ${theme.header} ${theme.border}`}>
                   <div className="relative z-10">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => setSelectedCategory(null)}
-                          className="rounded-lg p-1.5 transition-colors hover:bg-sand-100 dark:hover:bg-forest-700"
+                          className="rounded-lg p-1.5 transition-colors hover:bg-white/70 dark:hover:bg-forest-700"
                           aria-label="Back to all categories"
                         >
                           <ChevronRight className="h-5 w-5 rotate-180 text-sand-500 dark:text-sand-400" />
@@ -376,14 +415,14 @@ export default function ChecklistSection({
                       <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
                         progress.percentage === 100
                           ? 'bg-forest-100 text-forest-700 dark:bg-forest-800 dark:text-forest-300'
-                          : 'bg-sand-100 text-sand-600 dark:bg-forest-800 dark:text-sand-400'
+                          : theme.badge
                       }`}>
                         {progress.completedItems}/{progress.totalItems}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-sand-200 dark:bg-forest-700">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/80 dark:bg-forest-950/50">
                       <div
-                        className={`h-full rounded-full bg-gradient-to-r ${getCategoryColor(categoryIndex)} transition-all duration-500`}
+                        className={`h-full rounded-full bg-gradient-to-r ${theme.bar} transition-all duration-500`}
                         style={{ width: `${progress.percentage}%` }}
                         role="progressbar"
                         aria-valuenow={progress.percentage}
@@ -395,16 +434,16 @@ export default function ChecklistSection({
                 </header>
 
                 <div className="p-4 sm:p-6">
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-2.5">
                     {category.items.map((item, itemIndex) =>
                       renderChecklistItem(category.id, item, itemIndex, true)
                     )}
                   </ul>
                 </div>
               </article>
+              </div>
             )
-          })()}
-        </div>
+        })()
       )}
 
       <aside className="tips-box mt-8">
