@@ -339,7 +339,7 @@ export default function ImportExportManager({
   ]
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-forest-900 dark:text-sand-50 mb-2">
           Import & Export Data

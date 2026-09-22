@@ -46,7 +46,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-3">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-stretch gap-3 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-4 sm:right-4 sm:items-end sm:p-0">
         {toasts.map((toast, index) => (
           <ToastItem 
             key={toast.id} 
@@ -95,7 +95,7 @@ function ToastItem({ toast, onClose, index }: { toast: Toast; onClose: () => voi
 
   return (
     <div 
-      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border backdrop-blur-sm shadow-lg min-w-[320px] max-w-md animate-slide-in ${style.container}`}
+      className={`pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border px-4 py-3.5 shadow-lg backdrop-blur-sm animate-slide-in sm:min-w-[20rem] ${style.container}`}
       style={{ animationDelay: `${index * 50}ms` }}
       role="alert"
     >

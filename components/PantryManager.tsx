@@ -147,9 +147,9 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
   const currentItem = editingItem || newItem
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-6 flex flex-col items-stretch justify-between gap-3 sm:mb-8 sm:flex-row sm:items-center sm:gap-4">
         <div>
           <h2 className="text-2xl font-bold text-forest-900 dark:text-sand-50 mb-2">
             Pantry Management
@@ -160,7 +160,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary"
+          className="btn-primary w-full sm:w-auto"
           aria-label="Add new pantry item"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -265,10 +265,10 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
               return (
                 <div 
                   key={item.id} 
-                  className="p-5 hover:bg-sand-50 dark:hover:bg-forest-800/50 transition-colors animate-fade-in"
+                  className="p-4 hover:bg-sand-50 dark:hover:bg-forest-800/50 transition-colors animate-fade-in sm:p-5"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-2 sm:gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <h4 className="font-bold text-forest-900 dark:text-sand-50">{item.name}</h4>
@@ -282,7 +282,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sand-500 dark:text-sand-400">Qty:</span>
                           <span className="font-semibold text-forest-700 dark:text-forest-300">{item.quantity} {item.unit}</span>
@@ -291,7 +291,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                           <span className="text-sand-500 dark:text-sand-400">Min:</span>
                           <span className="font-medium text-sand-600 dark:text-sand-300">{item.minQuantity} {item.unit}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sand-500 dark:text-sand-400">Expires:</span>
                           <span className={`font-medium ${
                             expiryStatus.status === 'expired' ? 'text-red-600 dark:text-red-400' :
@@ -304,9 +304,9 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                           </span>
                         </div>
                         {item.notes && (
-                          <div className="col-span-2 md:col-span-1">
+                          <div className="sm:col-span-2 md:col-span-1">
                             <span className="text-sand-500 dark:text-sand-400">Notes:</span>
-                            <span className="ml-1 text-sand-600 dark:text-sand-300">{item.notes}</span>
+                            <span className="ml-1 break-words text-sand-600 dark:text-sand-300">{item.notes}</span>
                           </div>
                         )}
                       </div>
@@ -315,14 +315,14 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setEditingItem(item)}
-                        className="p-2.5 rounded-xl text-sand-400 hover:text-forest-600 dark:hover:text-forest-400 hover:bg-sand-100 dark:hover:bg-forest-800 transition-all focus:outline-none focus:ring-2 focus:ring-forest-500"
+                        className="touch-target rounded-xl text-sand-400 hover:text-forest-600 dark:hover:text-forest-400 hover:bg-sand-100 dark:hover:bg-forest-800 transition-all focus:outline-none focus:ring-2 focus:ring-forest-500"
                         aria-label={`Edit ${item.name}`}
                       >
                         <Edit className="h-4 w-4" aria-hidden="true" />
                       </button>
                       <button
                         onClick={() => handleDeleteClick(item.id)}
-                        className="p-2.5 rounded-xl text-sand-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="touch-target rounded-xl text-sand-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
                         aria-label={`Delete ${item.name}`}
                       >
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -489,7 +489,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                 >
                   {editingItem ? 'Update' : 'Add'} Item
                 </button>

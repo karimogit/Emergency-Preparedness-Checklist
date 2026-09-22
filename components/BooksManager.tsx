@@ -120,9 +120,9 @@ export default function BooksManager() {
   const currentBook = editingBook || newBook
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-6 flex flex-col items-stretch justify-between gap-3 sm:mb-8 sm:flex-row sm:items-center sm:gap-4">
         <div>
           <h2 className="text-2xl font-bold text-forest-900 dark:text-sand-50 mb-2">
             Essential Books
@@ -133,7 +133,7 @@ export default function BooksManager() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary"
+          className="btn-primary w-full sm:w-auto"
           aria-label="Add new book"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -203,10 +203,10 @@ export default function BooksManager() {
             filteredBooks.map((book, index) => (
               <div 
                 key={book.id} 
-                className="p-5 hover:bg-sand-50 dark:hover:bg-forest-800/50 transition-colors animate-fade-in"
+                className="p-4 hover:bg-sand-50 dark:hover:bg-forest-800/50 transition-colors animate-fade-in sm:p-5"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <h4 className="font-bold text-forest-900 dark:text-sand-50">{book.title}</h4>
@@ -237,14 +237,14 @@ export default function BooksManager() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setEditingBook(book)}
-                      className="p-2.5 rounded-xl text-sand-400 hover:text-forest-600 dark:hover:text-forest-400 hover:bg-sand-100 dark:hover:bg-forest-800 transition-all focus:outline-none focus:ring-2 focus:ring-forest-500"
+                      className="touch-target rounded-xl text-sand-400 hover:text-forest-600 dark:hover:text-forest-400 hover:bg-sand-100 dark:hover:bg-forest-800 transition-all focus:outline-none focus:ring-2 focus:ring-forest-500"
                       aria-label={`Edit ${book.title}`}
                     >
                       <Edit className="h-4 w-4" aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(book.id)}
-                      className="p-2.5 rounded-xl text-sand-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="touch-target rounded-xl text-sand-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
                       aria-label={`Delete ${book.title}`}
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -393,7 +393,7 @@ export default function BooksManager() {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                 >
                   {editingBook ? 'Update' : 'Add'} Book
                 </button>

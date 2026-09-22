@@ -163,7 +163,7 @@ export default function ChecklistSection({
       >
         <button
           type="button"
-          className="mt-0.5 flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-forest-500"
+          className="mt-0.5 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-forest-500"
           aria-pressed={item.completed}
           aria-label={item.completed ? `Mark "${displayText}" as incomplete` : `Mark "${displayText}" as complete`}
           onClick={() => onUpdateItem(categoryId, item.id, !item.completed)}
@@ -191,18 +191,18 @@ export default function ChecklistSection({
   }
 
   return (
-    <div className="p-5 sm:p-7">
-      <div className="mb-8">
+    <div className="p-3 sm:p-7">
+      <div className="mb-6 sm:mb-8">
         <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-forest-600 dark:text-forest-400">
               72-hour readiness
             </p>
-            <h2 className="font-serif text-3xl font-semibold tracking-tight text-forest-950 dark:text-sand-50">
+            <h2 className="font-serif text-2xl font-semibold tracking-tight text-forest-950 dark:text-sand-50 sm:text-3xl">
               Emergency Checklist
             </h2>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <div className="inline-flex items-center gap-2 rounded-lg border border-forest-200 bg-forest-50/70 px-3 py-2 dark:border-forest-700 dark:bg-forest-800/60">
               <Users className="h-4 w-4 text-forest-600 dark:text-forest-400" aria-hidden="true" />
               <span className="text-sm font-medium text-forest-700 dark:text-forest-300">
@@ -213,55 +213,55 @@ export default function ChecklistSection({
               type="button"
               onClick={() => setConfirmReset(true)}
               disabled={completedCount === 0}
-              className="inline-flex items-center gap-2 rounded-lg border border-sand-200 px-3 py-2 text-sm font-medium text-sand-600 transition-colors hover:border-sand-300 hover:text-forest-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-forest-700 dark:text-sand-300 dark:hover:text-sand-100"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-sand-200 px-3 py-2 text-sm font-medium text-sand-600 transition-colors hover:border-sand-300 hover:text-forest-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-forest-700 dark:text-sand-300 dark:hover:text-sand-100 sm:flex-none"
             >
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
               Reset checks
             </button>
           </div>
         </div>
-        <p className="max-w-2xl text-sand-600 dark:text-sand-400">
+        <p className="max-w-2xl text-sm text-sand-600 dark:text-sand-400 sm:text-base">
           Work through the supplies, documents, and skills that matter in the first 72 hours.
           Water targets follow your household size and preferred units.
         </p>
       </div>
 
-      <section className="mb-8 grid gap-4 sm:grid-cols-3" aria-label="72 hour supply targets">
-        <div className="relative overflow-hidden rounded-2xl border-2 border-forest-300 bg-gradient-to-br from-forest-50 via-white to-cyan-50/40 p-5 dark:border-forest-500 dark:from-forest-900/70 dark:via-forest-900/40 dark:to-forest-800/30">
+      <section className="mb-6 grid gap-3 sm:mb-8 sm:grid-cols-3 sm:gap-4" aria-label="72 hour supply targets">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-forest-300 bg-gradient-to-br from-forest-50 via-white to-cyan-50/40 p-4 sm:p-5 dark:border-forest-500 dark:from-forest-900/70 dark:via-forest-900/40 dark:to-forest-800/30">
           <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-forest-400/10 blur-2xl" aria-hidden="true" />
           <div className="relative">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-1 flex items-center gap-2 sm:mb-2">
               <Droplets className="h-4 w-4 text-forest-600 dark:text-forest-400" aria-hidden="true" />
               <p className="text-xs font-semibold uppercase tracking-wide text-forest-600 dark:text-forest-300">
                 Drinking water
               </p>
             </div>
-            <p className="font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">{waterTarget}</p>
-            <p className="mt-2 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+            <p className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50 sm:text-2xl">{waterTarget}</p>
+            <p className="mt-1 text-xs leading-relaxed text-sand-600 dark:text-sand-400 sm:mt-2">
               {dailyRate} per person per day
               {supplyTargets.pets > 0 ? ', plus an estimate for pets' : ''}, for {supplyTargets.days} days.
             </p>
           </div>
         </div>
-        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/90 via-white to-sand-50 p-5 dark:border-amber-600 dark:from-amber-950/25 dark:via-forest-900/40 dark:to-forest-900/20">
+        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/90 via-white to-sand-50 p-4 sm:p-5 dark:border-amber-600 dark:from-amber-950/25 dark:via-forest-900/40 dark:to-forest-900/20">
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Food</p>
-          <p className="mt-2 font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">
+          <p className="mt-1 font-serif text-xl font-semibold text-forest-950 dark:text-sand-50 sm:mt-2 sm:text-2xl">
             {supplyTargets.days} days / person
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-1 text-xs leading-relaxed text-sand-600 dark:text-sand-400 sm:mt-2">
             Non-perishable food for each person. Keep pet food as its own supply.
           </p>
         </div>
-        <div className="rounded-2xl border-2 border-sky-300 bg-gradient-to-br from-sky-50 via-white to-indigo-50/40 p-5 dark:border-sky-600 dark:from-sky-950/30 dark:via-forest-900/40 dark:to-indigo-950/20">
+        <div className="rounded-2xl border-2 border-sky-300 bg-gradient-to-br from-sky-50 via-white to-indigo-50/40 p-4 sm:p-5 dark:border-sky-600 dark:from-sky-950/30 dark:via-forest-900/40 dark:to-indigo-950/20">
           <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">Household</p>
-          <p className="mt-2 font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">{householdLabel}</p>
-          <p className="mt-2 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
+          <p className="mt-1 font-serif text-xl font-semibold text-forest-950 dark:text-sand-50 sm:mt-2 sm:text-2xl">{householdLabel}</p>
+          <p className="mt-1 text-xs leading-relaxed text-sand-600 dark:text-sand-400 sm:mt-2">
             Change adults, children, and pets in Settings to update these targets.
           </p>
         </div>
       </section>
 
-      <div className="relative mb-6">
+      <div className="relative mb-4 sm:mb-6">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sand-400" aria-hidden="true" />
         <input
           id="checklist-search"
@@ -277,7 +277,7 @@ export default function ChecklistSection({
           <button
             type="button"
             onClick={() => setSearchTerm('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-1 text-sand-400 hover:bg-sand-100 hover:text-sand-600 dark:hover:bg-forest-800 dark:hover:text-sand-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-sand-400 hover:bg-sand-100 hover:text-sand-600 dark:hover:bg-forest-800 dark:hover:text-sand-300"
             aria-label="Clear checklist search"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -285,8 +285,8 @@ export default function ChecklistSection({
         )}
       </div>
 
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+      <div className="mb-6 sm:mb-8">
+        <div className="chip-scroll" role="group" aria-label="Filter by category">
           <button
             type="button"
             onClick={() => setSelectedCategory(null)}
@@ -317,11 +317,11 @@ export default function ChecklistSection({
 
       {selectedCategory === null ? (
         visibleCategories.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-sand-300 px-6 py-10 text-center text-sm text-sand-500 dark:border-forest-700 dark:text-sand-400">
+          <p className="rounded-xl border border-dashed border-sand-300 px-4 py-8 text-center text-sm text-sand-500 dark:border-forest-700 dark:text-sand-400 sm:px-6 sm:py-10">
             No checklist items match “{searchTerm.trim()}”.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-5 rounded-2xl bg-sand-100/90 p-3 dark:bg-black/25 sm:p-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 rounded-2xl bg-sand-100/90 p-2 dark:bg-black/25 sm:gap-5 sm:p-4 lg:grid-cols-2">
             {visibleCategories.map((category) => {
               const source = checklistItems.find(item => item.id === category.id) ?? category
               const categoryIndex = checklistItems.findIndex(item => item.id === category.id)
@@ -330,17 +330,17 @@ export default function ChecklistSection({
               return (
                 <article
                   key={category.id}
-                  className={`flex min-h-[320px] flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-card animate-fade-in-up dark:bg-[#173017] sm:min-h-[380px] ${theme.border}`}
+                  className={`flex min-h-0 flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-card animate-fade-in-up dark:bg-[#173017] sm:min-h-[380px] ${theme.border}`}
                   style={{ animationDelay: `${categoryIndex * 80}ms` }}
                 >
                   <div className={`h-1.5 bg-gradient-to-r ${theme.bar}`} aria-hidden="true" />
-                  <header className={`relative overflow-hidden border-b px-5 py-4 ${theme.header} ${theme.border}`}>
+                  <header className={`relative overflow-hidden border-b px-4 py-3 sm:px-5 sm:py-4 ${theme.header} ${theme.border}`}>
                     <div className="relative z-10">
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <h3 className="font-serif text-lg font-semibold text-forest-950 dark:text-sand-50">
+                        <h3 className="min-w-0 font-serif text-base font-semibold text-forest-950 dark:text-sand-50 sm:text-lg">
                           {category.category}
                         </h3>
-                        <span className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                        <span className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold ${
                           progress.percentage === 100
                             ? 'bg-forest-100 text-forest-700 dark:bg-forest-800 dark:text-forest-300'
                             : theme.badge
@@ -361,7 +361,7 @@ export default function ChecklistSection({
                     </div>
                   </header>
 
-                  <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                  <div className="flex-1 p-3 sm:overflow-y-auto sm:p-4">
                     <ul className="space-y-2">
                       {category.items.map((item, itemIndex) =>
                         renderChecklistItem(category.id, item, itemIndex)
