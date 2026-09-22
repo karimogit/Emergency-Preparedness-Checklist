@@ -39,19 +39,19 @@
   }
 
   body {
-    @apply bg-[#f4f6f2] text-forest-950 antialiased;
+    @apply bg-[#dce6d6] text-forest-950 antialiased;
     background-image:
-      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(61, 122, 61, 0.09) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(180, 140, 60, 0.06) 0%, transparent 50%),
-      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%233d7a3d' fill-opacity='0.035' fill-rule='evenodd'/%3E%3C/svg%3E");
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(61, 122, 61, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(180, 140, 60, 0.08) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%233d7a3d' fill-opacity='0.045' fill-rule='evenodd'/%3E%3C/svg%3E");
   }
 
   html.dark body {
-    @apply bg-forest-950 text-sand-100;
+    @apply bg-[#071107] text-sand-100;
     background-image:
-      radial-gradient(ellipse 70% 45% at 15% -5%, rgba(61, 122, 61, 0.18) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 35% at 95% 5%, rgba(180, 140, 60, 0.08) 0%, transparent 45%),
-      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%233d7a3d' fill-opacity='0.06' fill-rule='evenodd'/%3E%3C/svg%3E");
+      radial-gradient(ellipse 70% 45% at 15% -5%, rgba(61, 122, 61, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 35% at 95% 5%, rgba(180, 140, 60, 0.1) 0%, transparent 45%),
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%233d7a3d' fill-opacity='0.07' fill-rule='evenodd'/%3E%3C/svg%3E");
   }
 
   /* Custom scrollbar */
@@ -95,8 +95,8 @@
 
   /* Tactical card style */
   .tactical-card {
-    @apply bg-white/95 dark:bg-forest-900/95 rounded-2xl;
-    @apply border border-sand-200/90 dark:border-forest-700/90;
+    @apply bg-white dark:bg-[#173017] rounded-2xl;
+    @apply border border-sand-300 dark:border-forest-600;
     @apply shadow-card transition-shadow duration-300;
   }
 
@@ -106,21 +106,21 @@
 
   /* Checklist item */
   .checklist-item {
-    @apply flex items-center gap-3 p-4 rounded-lg;
-    @apply bg-white dark:bg-forest-900/50;
-    @apply border border-sand-200 dark:border-forest-700/50;
+    @apply flex items-start gap-3 p-3 rounded-xl;
+    @apply bg-sand-50 dark:bg-forest-950/40;
+    @apply border border-sand-400 dark:border-forest-500;
     @apply transition-all duration-200;
-    @apply hover:border-forest-400 dark:hover:border-forest-500;
-    @apply hover:shadow-sm hover:bg-sand-50 dark:hover:bg-forest-800/50;
+    @apply hover:border-forest-400 dark:hover:border-forest-400;
+    @apply hover:shadow-sm hover:bg-white dark:hover:bg-forest-800/70;
   }
   
   .checklist-item.completed {
-    @apply bg-forest-50/80 dark:bg-forest-900/30;
-    @apply border-forest-200 dark:border-forest-700/30;
+    @apply bg-forest-100/80 dark:bg-forest-800/50;
+    @apply border-forest-300 dark:border-forest-500;
   }
   
   .checklist-item.completed .item-text {
-    @apply line-through text-sand-500 dark:text-sand-600;
+    @apply line-through text-sand-500 dark:text-sand-400;
   }
   
   /* Family info card with gradient */
@@ -206,8 +206,8 @@
   /* Input field */
   .input-field {
     @apply w-full px-4 py-2.5 rounded-lg;
-    @apply bg-white dark:bg-forest-900;
-    @apply border border-sand-300 dark:border-forest-600;
+    @apply bg-white dark:bg-forest-950;
+    @apply border border-sand-300 dark:border-forest-500;
     @apply text-forest-900 dark:text-sand-100;
     @apply placeholder-sand-400 dark:placeholder-forest-400;
     @apply transition-all duration-200;
@@ -292,9 +292,9 @@
   .category-pill {
     @apply inline-flex items-center px-3 py-1.5 rounded-lg;
     @apply text-sm font-medium transition-all duration-200 cursor-pointer;
-    @apply bg-sand-100/90 dark:bg-forest-800 text-sand-600 dark:text-sand-300;
-    @apply border border-sand-200 dark:border-forest-700;
-    @apply hover:bg-forest-100 dark:hover:bg-forest-700 hover:border-forest-300;
+    @apply bg-white dark:bg-forest-800 text-sand-700 dark:text-sand-200;
+    @apply border border-sand-300 dark:border-forest-600;
+    @apply hover:bg-forest-100 dark:hover:bg-forest-700 hover:border-forest-400;
   }
 
   .category-pill.active {
@@ -326,23 +326,23 @@
 
   /* Modal overlay */
   .modal-overlay {
-    @apply fixed inset-0 z-50;
+    @apply fixed inset-0 z-[60];
     @apply bg-forest-950/60 dark:bg-forest-950/80 backdrop-blur-sm;
     @apply flex items-center justify-center p-4;
     animation: fadeIn 0.2s ease-out;
   }
 
   .modal-content {
-    @apply bg-white dark:bg-forest-900 rounded-2xl shadow-2xl;
+    @apply bg-white dark:bg-[#173017] rounded-2xl shadow-2xl;
     @apply max-w-lg w-full max-h-[90vh] overflow-hidden;
-    @apply border border-sand-200 dark:border-forest-700;
+    @apply border border-sand-300 dark:border-forest-600;
     animation: scaleIn 0.2s ease-out;
   }
 
-  /* Sidebar styling */
+  /* Sidebar styling — sits below the header so the two do not overlap */
   .sidebar {
-    @apply bg-white dark:bg-forest-900;
-    @apply border-r border-sand-200 dark:border-forest-700;
+    @apply bg-white dark:bg-[#173017];
+    @apply border-r border-sand-300 dark:border-forest-600;
     @apply bg-tactical-pattern;
   }
 
@@ -356,7 +356,7 @@
 
   .sidebar-nav-item.active {
     @apply bg-forest-100 dark:bg-forest-800/80 text-forest-800 dark:text-forest-200;
-    @apply border border-forest-200 dark:border-forest-700;
+    @apply border border-forest-300 dark:border-forest-600;
   }
 
   .sidebar-nav-subitem {
@@ -373,8 +373,8 @@
 
   /* Header styling */
   .header {
-    @apply bg-white/90 dark:bg-forest-900/90 backdrop-blur-md;
-    @apply border-b border-sand-200 dark:border-forest-700;
+    @apply bg-white/95 dark:bg-[#173017]/95 backdrop-blur-md;
+    @apply border-b border-sand-300 dark:border-forest-600;
     @apply shadow-sm;
   }
 
@@ -382,15 +382,15 @@
   .section-header {
     @apply bg-gradient-to-r from-forest-50 via-forest-50/50 to-sand-50;
     @apply dark:from-forest-800/50 dark:via-forest-800/30 dark:to-forest-900/50;
-    @apply px-6 py-4 border-b border-sand-200 dark:border-forest-700;
+    @apply px-6 py-4 border-b border-sand-300 dark:border-forest-600;
   }
 
   /* Tips box */
   .tips-box {
     @apply relative overflow-hidden rounded-xl p-6;
     @apply bg-gradient-to-br from-forest-50 via-forest-50/80 to-amber-50/50;
-    @apply dark:from-forest-800/30 dark:via-forest-800/20 dark:to-amber-900/10;
-    @apply border border-forest-200 dark:border-forest-700;
+    @apply dark:from-forest-800/40 dark:via-forest-800/25 dark:to-amber-900/15;
+    @apply border border-forest-300 dark:border-forest-600;
   }
 
   .tips-box::before {
@@ -398,19 +398,6 @@
     @apply absolute top-0 right-0 w-32 h-32;
     @apply bg-gradient-to-br from-amber-200/30 to-transparent rounded-full blur-2xl;
     @apply dark:from-amber-400/10;
-  }
-
-  /* Notion promotion box */
-  .notion-promo {
-    @apply relative overflow-hidden rounded-xl p-6;
-    @apply bg-gradient-to-r from-forest-600 to-forest-800;
-    @apply dark:from-forest-700 dark:to-forest-900;
-    @apply text-white shadow-tactical;
-  }
-
-  .notion-promo::before {
-    content: '';
-    @apply absolute inset-0 bg-tactical-pattern opacity-10;
   }
 }
 
