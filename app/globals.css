@@ -350,19 +350,6 @@
     @apply bg-gradient-to-br from-amber-200/30 to-transparent rounded-full blur-2xl;
     @apply dark:from-amber-400/10;
   }
-
-  /* Notion promotion box */
-  .notion-promo {
-    @apply relative overflow-hidden rounded-xl p-6;
-    @apply bg-gradient-to-r from-forest-600 to-forest-800;
-    @apply dark:from-forest-700 dark:to-forest-900;
-    @apply text-white shadow-tactical;
-  }
-
-  .notion-promo::before {
-    content: '';
-    @apply absolute inset-0 bg-tactical-pattern opacity-10;
-  }
 }
 
 @layer utilities {
