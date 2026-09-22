@@ -467,10 +467,10 @@ function HomeContent() {
                 />
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-sand-500 dark:text-sand-400">
-                  <span className="font-semibold text-forest-600 dark:text-forest-400">{stats.completedItems}</span> of {stats.totalItems} items
+                <span className="text-sand-600 dark:text-sand-300">
+                  <span className="font-semibold text-forest-700 dark:text-forest-300">{stats.completedItems}</span> of {stats.totalItems} items
                 </span>
-                <span className="text-amber-600 dark:text-amber-400 font-medium">
+                <span className="text-amber-700 dark:text-amber-400 font-medium">
                   {stats.totalItems - stats.completedItems} left
                 </span>
               </div>
