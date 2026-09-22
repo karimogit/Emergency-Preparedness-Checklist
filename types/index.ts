@@ -159,6 +159,15 @@ export interface Document {
 // Theme
 export type Theme = 'light' | 'dark' | 'system'
 
+// Display Settings
+export type FontSize = 'sm' | 'md' | 'lg' | 'xl'
+export type FontFamilyChoice = 'sans' | 'serif'
+
+export interface DisplaySettings {
+  fontSize: FontSize
+  fontFamily: FontFamilyChoice
+}
+
 // Toast Types
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
