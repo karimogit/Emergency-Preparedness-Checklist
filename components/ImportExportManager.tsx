@@ -6,7 +6,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useMemo } from 'react'
-import { Download, Upload, FileJson, FileSpreadsheet, FileText, Printer, Copy, Check, FileDown } from 'lucide-react'
+import { Download, Upload, FileJson, FileSpreadsheet, FileText, Printer, Copy, Check, FileDown, Database, ShieldCheck, Lightbulb } from 'lucide-react'
 import { FamilyInfo, ChecklistItem, MetricsSettings, ExportData } from '@/types'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
@@ -281,164 +281,202 @@ export default function ImportExportManager({
     }
   }, [getAllData])
 
+  const summary = [
+    { label: 'Checklist items', value: counts.checklistItems },
+    { label: 'Pantry items', value: counts.pantryItems },
+    { label: 'Books', value: counts.books },
+    { label: 'Contacts', value: counts.contacts },
+    { label: 'HAM frequencies', value: counts.frequencies },
+    { label: 'Documents', value: counts.documents },
+  ]
+
+  const exportOptions = [
+    {
+      label: 'JSON backup',
+      hint: 'Complete backup. Restore it on any device.',
+      icon: FileJson,
+      onClick: handleExportJSON,
+      recommended: true,
+    },
+    {
+      label: 'PDF',
+      hint: 'Formatted checklist for a printed binder.',
+      icon: FileDown,
+      onClick: handleExportPDF,
+    },
+    {
+      label: 'CSV',
+      hint: 'Spreadsheet-friendly rows for analysis.',
+      icon: FileSpreadsheet,
+      onClick: handleExportCSV,
+    },
+    {
+      label: 'Plain text',
+      hint: 'Readable summary you can paste anywhere.',
+      icon: FileText,
+      onClick: handleExportText,
+    },
+    {
+      label: copied ? 'Copied to clipboard' : 'Copy JSON',
+      hint: 'Copy the backup to share or paste elsewhere.',
+      icon: copied ? Check : Copy,
+      onClick: handleCopyJSON,
+    },
+    {
+      label: 'Print',
+      hint: 'Open the print dialog for this page.',
+      icon: Printer,
+      onClick: handlePrint,
+    },
+  ]
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-forest-900 dark:text-sand-50 mb-2">
           Import & Export Data
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Backup your emergency preparedness data or import from a previous backup.
+        <p className="text-sand-600 dark:text-sand-400 max-w-3xl">
+          Back up your emergency preparedness data or restore it from a previous backup.
+          Everything stays on this device until you export it.
         </p>
       </div>
 
       {/* Data Summary */}
-      <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Your Data Summary
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.checklistItems}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Checklist Items</div>
+      <section className="tactical-card overflow-hidden mb-6 animate-fade-in-up stagger-1" aria-label="Data summary">
+        <div className="section-header">
+          <div className="flex items-center gap-3">
+            <Database className="h-5 w-5 text-forest-600 dark:text-forest-400" aria-hidden="true" />
+            <h3 className="text-lg font-bold text-forest-900 dark:text-sand-50">Your Data</h3>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.pantryItems}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-sand-200 dark:divide-forest-700">
+          {summary.map((item) => (
+            <div key={item.label} className="px-4 py-5 text-center">
+              <div className="text-2xl font-bold text-forest-600 dark:text-forest-400 tabular-nums">
+                {item.value}
+              </div>
+              <div className="mt-1 text-xs font-medium uppercase tracking-wide text-sand-500 dark:text-sand-400">
+                {item.label}
+              </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Pantry Items</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.books}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Books</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.contacts}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Contacts</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.frequencies}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">HAM Frequencies</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-brown-600 dark:text-brown-400">
-              {counts.documents}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Import Section */}
-      <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-          <Upload className="h-5 w-5 mr-2" aria-hidden="true" />
-          Import Data
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Import a previously exported backup file. This will overwrite your current data.
-        </p>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleImport}
-          className="hidden"
-          id="import-file"
-          aria-label="Choose file to import"
-          disabled={isImporting}
-        />
-        <label
-          htmlFor="import-file"
-          className={`inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 ${
-            isImporting ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          <Upload className="h-4 w-4" aria-hidden="true" />
-          <span>{isImporting ? 'Importing...' : 'Choose File to Import'}</span>
-        </label>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        {/* Import Section */}
+        <section className="tactical-card p-6 animate-fade-in-up stagger-2" aria-labelledby="import-heading">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+              <Upload className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            </div>
+            <h3 id="import-heading" className="text-lg font-bold text-forest-900 dark:text-sand-50">Import a backup</h3>
+          </div>
+          <p className="text-sm text-sand-600 dark:text-sand-400 mb-5 leading-relaxed">
+            Restore a JSON backup exported from this app. You will be asked to confirm before anything is replaced.
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImport}
+            className="sr-only"
+            id="import-file"
+            aria-label="Choose file to import"
+            disabled={isImporting}
+          />
+          <label
+            htmlFor="import-file"
+            className={`btn-secondary w-full cursor-pointer focus-within:ring-2 focus-within:ring-forest-500 focus-within:ring-offset-2 ${
+              isImporting ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+            }`}
+          >
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            <span>{isImporting ? 'Reading file...' : 'Choose JSON file'}</span>
+          </label>
+          <p className="mt-4 flex items-start gap-2 text-xs text-sand-500 dark:text-sand-400">
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-forest-500" aria-hidden="true" />
+            Files are read locally in your browser and never uploaded.
+          </p>
+        </section>
 
-      {/* Export Section */}
-      <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-          <Download className="h-5 w-5 mr-2" aria-hidden="true" />
-          Export Data
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Export your data in various formats for backup or sharing.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <button
-            onClick={handleExportJSON}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            <FileJson className="h-5 w-5" aria-hidden="true" />
-            <span>Export as JSON</span>
-          </button>
-          
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            <FileSpreadsheet className="h-5 w-5" aria-hidden="true" />
-            <span>Export as CSV</span>
-          </button>
-          
-          <button
-            onClick={handleExportText}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            <FileText className="h-5 w-5" aria-hidden="true" />
-            <span>Export as Text</span>
-          </button>
-          
-          <button
-            onClick={handleCopyJSON}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            {copied ? <Check className="h-5 w-5" aria-hidden="true" /> : <Copy className="h-5 w-5" aria-hidden="true" />}
-            <span>{copied ? 'Copied!' : 'Copy JSON'}</span>
-          </button>
-          
-          <button
-            onClick={handleExportPDF}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            <FileDown className="h-5 w-5" aria-hidden="true" />
-            <span>Export as PDF</span>
-          </button>
-          
-          <button
-            onClick={handlePrint}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-brown-600 text-white rounded-lg hover:bg-brown-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brown-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-          >
-            <Printer className="h-5 w-5" aria-hidden="true" />
-            <span>Print</span>
-          </button>
-        </div>
-      </section>
+        {/* Export Section */}
+        <section className="tactical-card p-6 animate-fade-in-up stagger-3" aria-labelledby="export-heading">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-forest-100 dark:bg-forest-800">
+              <Download className="h-5 w-5 text-forest-600 dark:text-forest-400" aria-hidden="true" />
+            </div>
+            <h3 id="export-heading" className="text-lg font-bold text-forest-900 dark:text-sand-50">Export your data</h3>
+          </div>
+          <p className="text-sm text-sand-600 dark:text-sand-400 mb-5 leading-relaxed">
+            Choose a format for backup, printing, or sharing.
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {exportOptions.map((option) => {
+              const Icon = option.icon
+              return (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={option.onClick}
+                  className={`group flex items-start gap-3 rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 dark:focus:ring-offset-forest-900 ${
+                    option.recommended
+                      ? 'border-forest-300 bg-forest-50/80 hover:border-forest-400 dark:border-forest-600 dark:bg-forest-800/50'
+                      : 'border-sand-200 bg-white hover:border-forest-300 dark:border-forest-700 dark:bg-forest-900/50 dark:hover:border-forest-500'
+                  }`}
+                >
+                  <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-colors ${
+                    option.recommended
+                      ? 'bg-forest-600 text-white dark:bg-forest-500'
+                      : 'bg-sand-100 text-forest-600 group-hover:bg-forest-100 dark:bg-forest-800 dark:text-forest-300 dark:group-hover:bg-forest-700'
+                  }`}>
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold text-forest-900 dark:text-sand-50">{option.label}</span>
+                      {option.recommended && (
+                        <span className="rounded-full bg-forest-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white dark:bg-forest-500">
+                          Recommended
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs leading-relaxed text-sand-500 dark:text-sand-400">{option.hint}</p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* Tips */}
-      <aside className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-          💡 Backup Tips
-        </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-          <li>• Export your data regularly to avoid losing important information</li>
-          <li>• Store backups in multiple locations (cloud storage, USB drive, etc.)</li>
-          <li>• JSON format is recommended for complete backup with all features</li>
-          <li>• CSV and text exports include the checklist, pantry, contacts, and documents</li>
-        </ul>
+      <aside className="mt-6 tips-box animate-fade-in-up stagger-4">
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+              <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-bold text-forest-800 dark:text-forest-200">Backup Tips</h3>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {[
+              'Export your data regularly so nothing important is lost.',
+              'Keep backups in more than one place: cloud storage, a USB drive, or your emergency binder.',
+              'JSON is the only format that restores everything, including household settings.',
+              'CSV and text exports cover the checklist, pantry, contacts, and documents.',
+            ].map((tip, index) => (
+              <li key={index} className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-forest-900/30 border border-forest-200/50 dark:border-forest-700/30">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-forest-100 dark:bg-forest-800 text-forest-600 dark:text-forest-400 text-xs font-bold flex items-center justify-center">
+                  {index + 1}
+                </span>
+                <span className="text-sm text-forest-700 dark:text-forest-300 leading-relaxed">{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
 
       <ConfirmDialog
