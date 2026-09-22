@@ -5,6 +5,16 @@
 
 import { ChecklistItem, PantryItem, Book, EmergencyContact, HamFrequency, Document, FamilyInfo } from '@/types'
 
+/** Calendar date a number of months from today, used so sample stock is not already expired. */
+function monthsFromToday(months: number): string {
+  const date = new Date()
+  date.setMonth(date.getMonth() + months)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 /**
  * Default Family Info
  */
@@ -269,7 +279,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Canned Goods',
     quantity: 6,
     unit: 'cans',
-    expiryDate: '2025-06-15',
+    expiryDate: monthsFromToday(18),
     minQuantity: 2,
     notes: 'Black beans and kidney beans for protein'
   },
@@ -279,7 +289,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Grains & Pasta',
     quantity: 10,
     unit: 'pounds',
-    expiryDate: '2026-03-20',
+    expiryDate: monthsFromToday(24),
     minQuantity: 5,
     notes: 'Long grain white rice'
   },
@@ -289,7 +299,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Beverages',
     quantity: 24,
     unit: 'bottles',
-    expiryDate: '2025-12-01',
+    expiryDate: monthsFromToday(12),
     minQuantity: 12,
     notes: '16.9 oz bottles'
   },
@@ -299,7 +309,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Snacks',
     quantity: 8,
     unit: 'bars',
-    expiryDate: '2024-11-30',
+    expiryDate: monthsFromToday(10),
     minQuantity: 4,
     notes: 'High protein emergency food'
   },
@@ -309,7 +319,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Canned Goods',
     quantity: 4,
     unit: 'cans',
-    expiryDate: '2025-08-10',
+    expiryDate: monthsFromToday(20),
     minQuantity: 2,
     notes: 'Albacore tuna in water'
   },
@@ -319,7 +329,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Condiments',
     quantity: 2,
     unit: 'jars',
-    expiryDate: '2025-02-15',
+    expiryDate: monthsFromToday(14),
     minQuantity: 1,
     notes: 'Natural peanut butter'
   },
@@ -329,7 +339,7 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Snacks',
     quantity: 3,
     unit: 'boxes',
-    expiryDate: '2024-12-20',
+    expiryDate: monthsFromToday(8),
     minQuantity: 1,
     notes: 'Saltine crackers'
   },
@@ -339,11 +349,49 @@ export const DEFAULT_PANTRY_ITEMS: PantryItem[] = [
     category: 'Canned Goods',
     quantity: 8,
     unit: 'cans',
-    expiryDate: '2025-07-05',
+    expiryDate: monthsFromToday(16),
     minQuantity: 4,
     notes: 'Mixed vegetables and corn'
   }
 ]
+
+const STALE_PANTRY_EXPIRY: Record<string, { name: string; expiryDate: string; months: number }> = {
+  '1': { name: 'Canned Beans', expiryDate: '2025-06-15', months: 18 },
+  '2': { name: 'Rice', expiryDate: '2026-03-20', months: 24 },
+  '3': { name: 'Bottled Water', expiryDate: '2025-12-01', months: 12 },
+  '4': { name: 'Protein Bars', expiryDate: '2024-11-30', months: 10 },
+  '5': { name: 'Canned Tuna', expiryDate: '2025-08-10', months: 20 },
+  '6': { name: 'Peanut Butter', expiryDate: '2025-02-15', months: 14 },
+  '7': { name: 'Crackers', expiryDate: '2024-12-20', months: 8 },
+  '8': { name: 'Canned Vegetables', expiryDate: '2025-07-05', months: 16 },
+}
+
+/** Move untouched sample pantry dates forward so first-run stock is not already expired. */
+export function migratePantryItems(items: PantryItem[]): PantryItem[] {
+  let changed = false
+  const next = items.map(item => {
+    const stale = STALE_PANTRY_EXPIRY[item.id]
+    if (!stale || item.name !== stale.name || item.expiryDate !== stale.expiryDate) return item
+    changed = true
+    return { ...item, expiryDate: monthsFromToday(stale.months) }
+  })
+  return changed ? next : items
+}
+
+const STALE_DOCUMENT_EXPIRY: Record<string, { name: string; expiryDate: string; months: number }> = {
+  '4': { name: 'Health Insurance Card', expiryDate: '2025-12-31', months: 18 },
+}
+
+export function migrateDocuments(documents: Document[]): Document[] {
+  let changed = false
+  const next = documents.map(document => {
+    const stale = STALE_DOCUMENT_EXPIRY[document.id]
+    if (!stale || document.name !== stale.name || document.expiryDate !== stale.expiryDate) return document
+    changed = true
+    return { ...document, expiryDate: monthsFromToday(stale.months) }
+  })
+  return changed ? next : documents
+}
 
 /**
  * Default Books
@@ -616,7 +664,7 @@ export const DEFAULT_DOCUMENTS: Document[] = [
     name: 'Health Insurance Card',
     category: 'Insurance',
     location: 'Wallet',
-    expiryDate: '2025-12-31',
+    expiryDate: monthsFromToday(18),
     isDigital: true,
     notes: 'Digital copy in phone',
     isEssential: true

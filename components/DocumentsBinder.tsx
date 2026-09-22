@@ -7,13 +7,13 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Plus, FileText, MapPin, Star, Trash2, Edit, Calendar, Search, X } from 'lucide-react'
-import { format } from 'date-fns'
 import { Document } from '@/types'
 import { useDocuments } from '@/hooks/useDocuments'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 import { DOCUMENT_CATEGORIES, DOCUMENT_CATEGORY_COLORS } from '@/lib/constants'
-import { getCategoryColor, getExpiryStatus } from '@/lib/utils'
+import { getCategoryColor, getExpiryStatus, formatDate, matchesSearch } from '@/lib/utils'
 import { documentSchema, validateForm } from '@/lib/validations'
 
 const EMPTY_DOCUMENT: Omit<Document, 'id'> = {
@@ -49,13 +49,7 @@ export default function DocumentsBinder() {
 
   // Filter documents based on search
   const filteredDocuments = useMemo(() => {
-    if (!searchTerm.trim()) return documents
-    const lower = searchTerm.toLowerCase()
-    return documents.filter(doc => 
-      doc.name.toLowerCase().includes(lower) ||
-      doc.category.toLowerCase().includes(lower) ||
-      doc.location.toLowerCase().includes(lower)
-    )
+    return documents.filter(doc => matchesSearch(searchTerm, [doc.name, doc.category, doc.location, doc.notes]))
   }, [documents, searchTerm])
 
   // Handle form submission
@@ -123,6 +117,8 @@ export default function DocumentsBinder() {
     setNewDocument(EMPTY_DOCUMENT)
   }, [])
 
+  useEscapeKey(showAddModal || editingDocument !== null, closeModal)
+
   const currentDocument = editingDocument || newDocument
 
   return (
@@ -152,6 +148,8 @@ export default function DocumentsBinder() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
           <input
+            id="documents-search"
+            name="documents-search"
             type="text"
             placeholder="Search documents..."
             value={searchTerm}
@@ -231,8 +229,8 @@ export default function DocumentsBinder() {
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 text-gray-400 mr-2" aria-hidden="true" />
                             <span className="font-medium">Expires:</span>
-                            <span className={`ml-1 ${expiryStatus.color} dark:${expiryStatus.color.replace('600', '400')}`}>
-                              {format(new Date(doc.expiryDate), 'MMM dd, yyyy')}
+                            <span className={`ml-1 ${expiryStatus.color}`}>
+                              {formatDate(doc.expiryDate)}
                               {expiryStatus.status === 'expired' && ' (Expired)'}
                               {expiryStatus.status === 'expiring' && ` (${expiryStatus.days} days)`}
                             </span>

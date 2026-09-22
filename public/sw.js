@@ -1,73 +1,73 @@
 /**
  * Service Worker for PWA Support
- * Enables offline functionality and caching
+ * Network-first for pages, cache-first for static assets.
+ * Non-GET requests are left to the browser.
  */
 
-const CACHE_NAME = 'emergency-prep-v1.1.0'
-const urlsToCache = [
-  '/',
-  '/offline.html'
-]
+const CACHE_NAME = 'emergency-prep-v1.2.0'
+const OFFLINE_URL = '/offline.html'
 
-// Install event - cache core assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => cache.addAll([OFFLINE_URL]))
       .then(() => self.skipWaiting())
   )
 })
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName)
-            }
-          })
-        )
-      })
+      .then((cacheNames) => Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName))
+      ))
       .then(() => self.clients.claim())
   )
 })
 
-// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response
-        }
-        
-        // Clone the request
-        const fetchRequest = event.request.clone()
-        
-        return fetch(fetchRequest).then((response) => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response
-          }
-          
-          // Clone the response
-          const responseToCache = response.clone()
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache)
-            })
-          
+  const request = event.request
+  if (request.method !== 'GET') return
+
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {})
           return response
         })
-      })
-      .catch(() => {
-        // If both cache and network fail, show offline page
-        return caches.match('/offline.html')
-      })
+        .catch(async () => {
+          const cachedPage = await caches.match(request)
+          return cachedPage || caches.match(OFFLINE_URL)
+        })
+    )
+    return
+  }
+
+  const isStatic = url.pathname.startsWith('/_next/static/') ||
+    /\.(?:svg|png|ico|webp|css|js|woff2?)$/.test(url.pathname)
+
+  if (!isStatic) return
+
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const network = fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {})
+          }
+          return response
+        })
+        .catch(() => cached)
+
+      return cached || network
+    })
   )
 })

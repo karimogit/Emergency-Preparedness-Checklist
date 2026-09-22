@@ -4,15 +4,43 @@
  */
 
 import { EXPIRY_THRESHOLDS } from './constants'
+import type { VolumeUnit } from '@/types'
+
+/**
+ * Parse a calendar date without shifting it across timezones.
+ * Date-only strings such as "2026-06-15" are treated as local dates.
+ */
+export function parseDateOnly(dateString: string): Date | null {
+  if (!dateString || !dateString.trim()) return null
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateString.trim())
+  if (match) {
+    const year = Number(match[1])
+    const month = Number(match[2])
+    const day = Number(match[3])
+    const date = new Date(year, month - 1, day)
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null
+    }
+    return date
+  }
+
+  const date = new Date(dateString)
+  return isNaN(date.getTime()) ? null : date
+}
 
 /**
  * Format a date string to a readable format
  */
 export function formatDate(dateString: string, format: 'short' | 'long' = 'short'): string {
   try {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) {
-      return 'Invalid date'
+    const date = parseDateOnly(dateString)
+    if (!date) {
+      return dateString ? 'Invalid date' : 'No date'
     }
     
     if (format === 'long') {
@@ -35,36 +63,127 @@ export function formatDate(dateString: string, format: 'short' | 'long' = 'short
 }
 
 /**
- * Calculate days until expiry
+ * Calculate days until expiry. Returns null when the date cannot be parsed.
  */
-export function getDaysUntilExpiry(expiryDate: string): number {
+export function getDaysUntilExpiry(expiryDate: string): number | null {
+  const expiry = parseDateOnly(expiryDate)
+  if (!expiry) return null
+
   const today = new Date()
-  const expiry = new Date(expiryDate)
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  today.setHours(0, 0, 0, 0)
+  expiry.setHours(0, 0, 0, 0)
+  return Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 /**
  * Get expiry status for an item
  */
 export interface ExpiryStatus {
-  status: 'expired' | 'expiring' | 'warning' | 'good'
+  status: 'expired' | 'expiring' | 'warning' | 'good' | 'unknown'
   days: number
   color: string
 }
 
 export function getExpiryStatus(expiryDate: string): ExpiryStatus {
   const days = getDaysUntilExpiry(expiryDate)
+
+  if (days === null) {
+    return { status: 'unknown', days: 0, color: 'text-sand-500 dark:text-sand-400' }
+  }
   
   if (days < EXPIRY_THRESHOLDS.EXPIRED) {
-    return { status: 'expired', days: Math.abs(days), color: 'text-red-600' }
+    return { status: 'expired', days: Math.abs(days), color: 'text-red-600 dark:text-red-400' }
   }
   if (days <= EXPIRY_THRESHOLDS.EXPIRING_SOON) {
-    return { status: 'expiring', days, color: 'text-orange-600' }
+    return { status: 'expiring', days, color: 'text-orange-600 dark:text-orange-400' }
   }
   if (days <= EXPIRY_THRESHOLDS.WARNING) {
-    return { status: 'warning', days, color: 'text-yellow-600' }
+    return { status: 'warning', days, color: 'text-yellow-600 dark:text-yellow-400' }
   }
-  return { status: 'good', days, color: 'text-green-600' }
+  return { status: 'good', days, color: 'text-green-600 dark:text-green-400' }
+}
+
+export interface SupplyTargets {
+  people: number
+  pets: number
+  days: number
+  waterGallons: number
+  waterLiters: number
+  waterQuarts: number
+}
+
+/**
+ * FEMA 72-hour planning targets.
+ * Water is 1 gallon per person per day. Pet water is estimated at 0.5 gallon per pet per day.
+ */
+export function getSupplyTargets(
+  family: { adults: number; children: number; pets: number },
+  days = 3
+): SupplyTargets {
+  const people = Math.max(0, family.adults) + Math.max(0, family.children)
+  const pets = Math.max(0, family.pets)
+  const waterGallons = roundQuantity(people * days + pets * days * 0.5)
+
+  return {
+    people,
+    pets,
+    days,
+    waterGallons,
+    waterLiters: roundQuantity(waterGallons * 3.785411784),
+    waterQuarts: roundQuantity(waterGallons * 4),
+  }
+}
+
+export function formatSupplyWater(targets: SupplyTargets, unit: VolumeUnit): string {
+  if (unit === 'liters') return `${targets.waterLiters} liters`
+  if (unit === 'quarts') return `${targets.waterQuarts} quarts`
+  return `${targets.waterGallons} gallons`
+}
+
+function roundQuantity(value: number): number {
+  return Math.round(value * 10) / 10
+}
+
+/**
+ * Case-insensitive search that tolerates missing fields.
+ */
+export function matchesSearch(term: string, values: unknown[]): boolean {
+  const query = term.trim().toLowerCase()
+  if (!query) return true
+  return values.some(value => String(value ?? '').toLowerCase().includes(query))
+}
+
+/**
+ * Escape text for insertion into HTML.
+ */
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/**
+ * Escape a value for a CSV cell, including spreadsheet formula injection.
+ */
+export function escapeCsv(value: unknown): string {
+  const raw = String(value ?? '')
+  const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw
+  return `"${safe.replace(/"/g, '""')}"`
+}
+
+export function readStoredJson<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (raw === null) return fallback
+    return JSON.parse(raw) as T
+  } catch (error) {
+    console.error(`Error reading localStorage key "${key}":`, error)
+    return fallback
+  }
 }
 
 /**

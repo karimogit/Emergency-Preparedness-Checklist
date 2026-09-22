@@ -6,12 +6,15 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { CheckCircle, Circle, Users, Lightbulb, ChevronRight } from 'lucide-react'
+import { CheckCircle, Circle, Users, Lightbulb, ChevronRight, Search, X, RotateCcw } from 'lucide-react'
 import { ChecklistItem, FamilyInfo, MetricsSettings } from '@/types'
+import { formatSupplyWater, getSupplyTargets, matchesSearch } from '@/lib/utils'
+import ConfirmDialog from './ConfirmDialog'
 
 interface ChecklistSectionProps {
   checklistItems: ChecklistItem[]
   onUpdateItem: (categoryId: number, itemId: string, completed: boolean) => void
+  onReset: () => void
   familyInfo: FamilyInfo
   metricsSettings: MetricsSettings
 }
@@ -19,10 +22,13 @@ interface ChecklistSectionProps {
 export default function ChecklistSection({ 
   checklistItems, 
   onUpdateItem, 
+  onReset,
   familyInfo, 
   metricsSettings 
 }: ChecklistSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [confirmReset, setConfirmReset] = useState(false)
 
   const selectCategory = useCallback((categoryId: number) => {
     setSelectedCategory(prev => prev === categoryId ? null : categoryId)
@@ -35,26 +41,28 @@ export default function ChecklistSection({
     return { totalItems, completedItems, percentage }
   }, [])
 
-  const overallProgress = useMemo(() => {
-    const allItems = checklistItems.flatMap(category => category.items)
-    const totalItems = allItems.length
-    const completedItems = allItems.filter(item => item.completed).length
-    const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0
-    return { totalItems, completedItems, percentage }
-  }, [checklistItems])
+  const completedCount = useMemo(
+    () => checklistItems.reduce((sum, category) => sum + category.items.filter(item => item.completed).length, 0),
+    [checklistItems]
+  )
 
-  const convertWaterText = useCallback((text: string) => {
-    if (text.includes('gallon') && metricsSettings.volume !== 'gallons') {
-      if (metricsSettings.volume === 'liters') {
-        return text.replace('gallon', 'liter').replace('gallons', 'liters')
-      } else if (metricsSettings.volume === 'quarts') {
-        return text.replace('gallon', 'quart').replace('gallons', 'quarts')
-      }
-    }
-    return text
-  }, [metricsSettings.volume])
+  const supplyTargets = useMemo(() => getSupplyTargets(familyInfo), [familyInfo])
+  const waterTarget = formatSupplyWater(supplyTargets, metricsSettings.volume)
 
-  const totalFamilyMembers = familyInfo.adults + familyInfo.children + familyInfo.pets
+  const visibleCategories = useMemo(() => {
+    const query = searchTerm.trim()
+    if (!query) return checklistItems
+
+    return checklistItems.flatMap(category => {
+      if (matchesSearch(query, [category.category])) return [category]
+      const items = category.items.filter(item => matchesSearch(query, [item.text]))
+      return items.length > 0 ? [{ ...category, items }] : []
+    })
+  }, [checklistItems, searchTerm])
+
+  const householdLabel = supplyTargets.pets > 0
+    ? `${supplyTargets.people} people and ${supplyTargets.pets} pets`
+    : `${supplyTargets.people} ${supplyTargets.people === 1 ? 'person' : 'people'}`
 
   // Get a color for category based on index
   const getCategoryColor = (index: number) => {
@@ -77,17 +85,70 @@ export default function ChecklistSection({
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
           <h2 className="text-2xl font-bold text-forest-900 dark:text-sand-50">Emergency Checklist</h2>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-forest-100 dark:bg-forest-800 border border-forest-200 dark:border-forest-700">
-            <Users className="h-4 w-4 text-forest-600 dark:text-forest-400" aria-hidden="true" />
-            <span className="text-sm font-medium text-forest-700 dark:text-forest-300">
-              Recommended for {totalFamilyMembers} family members
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-forest-100 dark:bg-forest-800 border border-forest-200 dark:border-forest-700">
+              <Users className="h-4 w-4 text-forest-600 dark:text-forest-400" aria-hidden="true" />
+              <span className="text-sm font-medium text-forest-700 dark:text-forest-300">
+                Planned for {householdLabel}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setConfirmReset(true)}
+              disabled={completedCount === 0}
+              className="inline-flex items-center gap-2 rounded-full border border-sand-200 px-4 py-2 text-sm font-medium text-sand-600 transition-colors hover:border-sand-300 hover:text-forest-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-forest-700 dark:text-sand-300 dark:hover:text-sand-100"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              Reset checks
+            </button>
           </div>
         </div>
         <p className="text-sand-600 dark:text-sand-400 max-w-3xl">
-          Complete these essential items to ensure your family is prepared for any emergency. 
-          Quantities are automatically adjusted based on your family size.
+          Work through the supplies, documents, and skills that matter in the first 72 hours.
+          Water and food targets below follow your household size.
         </p>
+      </div>
+
+      <section className="mb-8 grid gap-3 sm:grid-cols-3" aria-label="72 hour supply targets">
+        <div className="rounded-xl border border-forest-200 bg-forest-50/80 p-4 dark:border-forest-700 dark:bg-forest-900/40">
+          <p className="text-xs font-semibold uppercase tracking-wide text-forest-600 dark:text-forest-300">Drinking water</p>
+          <p className="mt-1 text-lg font-bold text-forest-900 dark:text-sand-50">{waterTarget}</p>
+          <p className="mt-1 text-xs text-sand-600 dark:text-sand-400">1 gallon per person per day, plus an estimate for pets, for {supplyTargets.days} days.</p>
+        </div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Food</p>
+          <p className="mt-1 text-lg font-bold text-forest-900 dark:text-sand-50">{supplyTargets.days} days / person</p>
+          <p className="mt-1 text-xs text-sand-600 dark:text-sand-400">Non-perishable food for each person. Keep pet food as its own supply.</p>
+        </div>
+        <div className="rounded-xl border border-sand-200 bg-sand-50 p-4 dark:border-forest-700 dark:bg-forest-900/40">
+          <p className="text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400">Household</p>
+          <p className="mt-1 text-lg font-bold text-forest-900 dark:text-sand-50">{householdLabel}</p>
+          <p className="mt-1 text-xs text-sand-600 dark:text-sand-400">Change adults, children, and pets in the sidebar to update these targets.</p>
+        </div>
+      </section>
+
+      <div className="relative mb-6">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sand-400" aria-hidden="true" />
+        <input
+          id="checklist-search"
+          name="checklist-search"
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search checklist items..."
+          className="input-field pl-12 pr-12"
+          aria-label="Search checklist items"
+        />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg p-1 text-sand-400 hover:bg-sand-100 hover:text-sand-600 dark:hover:bg-forest-800 dark:hover:text-sand-300"
+            aria-label="Clear checklist search"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* Category Filter */}
@@ -121,9 +182,16 @@ export default function ChecklistSection({
 
       {/* Checklist Items */}
       {selectedCategory === null ? (
+        visibleCategories.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-sand-300 px-6 py-10 text-center text-sm text-sand-500 dark:border-forest-700 dark:text-sand-400">
+            No checklist items match “{searchTerm.trim()}”.
+          </p>
+        ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {checklistItems.map((category, categoryIndex) => {
-            const progress = getCategoryProgress(category)
+          {visibleCategories.map((category) => {
+            const source = checklistItems.find(item => item.id === category.id) ?? category
+            const categoryIndex = checklistItems.findIndex(item => item.id === category.id)
+            const progress = getCategoryProgress(source)
             return (
               <article
                 key={category.id}
@@ -162,7 +230,7 @@ export default function ChecklistSection({
                 <div className="flex-1 p-5 overflow-y-auto">
                   <ul className="space-y-2.5">
                     {category.items.map((item, itemIndex) => {
-                      const displayText = convertWaterText(item.text)
+                      const displayText = item.text || 'Untitled item'
                       
                       return (
                         <li 
@@ -206,13 +274,21 @@ export default function ChecklistSection({
             )
           })}
         </div>
+        )
       ) : (
         <div className="tactical-card overflow-hidden animate-fade-in">
           {(() => {
-            const category = checklistItems.find(cat => cat.id === selectedCategory)
-            if (!category) return null
+            const category = visibleCategories.find(cat => cat.id === selectedCategory)
+            const source = checklistItems.find(cat => cat.id === selectedCategory)
+            if (!category || !source) {
+              return (
+                <p className="px-6 py-10 text-center text-sm text-sand-500 dark:text-sand-400">
+                  Nothing in this category matches your search.
+                </p>
+              )
+            }
             
-            const progress = getCategoryProgress(category)
+            const progress = getCategoryProgress(source)
             const categoryIndex = checklistItems.findIndex(cat => cat.id === selectedCategory)
             
             return (
@@ -257,7 +333,7 @@ export default function ChecklistSection({
                 <div className="p-6">
                   <ul className="space-y-2.5">
                     {category.items.map((item, itemIndex) => {
-                      const displayText = convertWaterText(item.text)
+                      const displayText = item.text || 'Untitled item'
                       
                       return (
                         <li 
@@ -331,6 +407,20 @@ export default function ChecklistSection({
           </ul>
         </div>
       </aside>
+
+      <ConfirmDialog
+        isOpen={confirmReset}
+        title="Reset checklist"
+        message="This clears every check mark. Your household notes, pantry, contacts, and other records stay as they are."
+        confirmText="Reset checks"
+        cancelText="Keep progress"
+        variant="warning"
+        onConfirm={() => {
+          onReset()
+          setConfirmReset(false)
+        }}
+        onCancel={() => setConfirmReset(false)}
+      />
     </div>
   )
 }

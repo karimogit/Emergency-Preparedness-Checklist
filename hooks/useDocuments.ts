@@ -3,18 +3,26 @@
  * Custom hook for managing documents with localStorage
  */
 
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 import { Document } from '@/types'
 import { STORAGE_KEYS } from '@/lib/constants'
 import { generateId, getExpiryStatus } from '@/lib/utils'
-import { DEFAULT_DOCUMENTS } from '@/lib/defaultData'
+import { DEFAULT_DOCUMENTS, migrateDocuments } from '@/lib/defaultData'
 
 export function useDocuments() {
   const [documents, setDocuments] = useLocalStorage<Document[]>(
     STORAGE_KEYS.DOCUMENTS,
     DEFAULT_DOCUMENTS
   )
+  const migrated = useRef(false)
+
+  useEffect(() => {
+    if (migrated.current) return
+    migrated.current = true
+    const next = migrateDocuments(documents)
+    if (next !== documents) setDocuments(next)
+  }, [documents, setDocuments])
 
   const addDocument = useCallback((document: Omit<Document, 'id'>) => {
     const newDocument: Document = {

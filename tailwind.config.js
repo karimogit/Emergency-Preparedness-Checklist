@@ -5,6 +5,8 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './contexts/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,tsx}',
+    './hooks/**/*.{js,ts,tsx}',
   ],
   darkMode: 'class',
   theme: {

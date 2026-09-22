@@ -9,10 +9,11 @@ import { useState, useMemo, useCallback } from 'react'
 import { Plus, Radio, MapPin, Star, Trash2, Edit, Search, X } from 'lucide-react'
 import { HamFrequency } from '@/types'
 import { useHamFrequencies } from '@/hooks/useHamFrequencies'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 import { HAM_LOCATION_TYPES, HAM_LOCATION_COLORS } from '@/lib/constants'
-import { getCategoryColor } from '@/lib/utils'
+import { getCategoryColor, matchesSearch } from '@/lib/utils'
 import { hamFrequencySchema, validateForm } from '@/lib/validations'
 
 const EMPTY_FREQUENCY: Omit<HamFrequency, 'id'> = {
@@ -45,13 +46,7 @@ export default function HamRadioFrequencies() {
 
   // Filter frequencies based on search
   const filteredFrequencies = useMemo(() => {
-    if (!searchTerm.trim()) return frequencies
-    const lower = searchTerm.toLowerCase()
-    return frequencies.filter(freq => 
-      freq.frequency.toLowerCase().includes(lower) ||
-      freq.description.toLowerCase().includes(lower) ||
-      freq.location.toLowerCase().includes(lower)
-    )
+    return frequencies.filter(freq => matchesSearch(searchTerm, [freq.frequency, freq.description, freq.location, freq.notes]))
   }, [frequencies, searchTerm])
 
   // Handle form submission
@@ -119,6 +114,8 @@ export default function HamRadioFrequencies() {
     setNewFrequency(EMPTY_FREQUENCY)
   }, [])
 
+  useEscapeKey(showAddModal || editingFrequency !== null, closeModal)
+
   const currentFrequency = editingFrequency || newFrequency
 
   return (
@@ -148,6 +145,8 @@ export default function HamRadioFrequencies() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
           <input
+            id="frequencies-search"
+            name="frequencies-search"
             type="text"
             placeholder="Search frequencies..."
             value={searchTerm}

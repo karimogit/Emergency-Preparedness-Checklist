@@ -11,6 +11,7 @@ import {
   DOCUMENT_CATEGORIES, 
   HAM_LOCATION_TYPES 
 } from './constants'
+import type { ExportData } from '@/types'
 
 // Common validations
 const requiredString = z.string().min(1, 'This field is required')
@@ -133,4 +134,45 @@ export function validateForm<T>(schema: z.ZodSchema<T>, data: unknown): {
   })
   
   return { success: false, errors }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Validate a backup file before it replaces local data.
+ */
+export function parseBackup(value: unknown): { success: true; data: ExportData } | { success: false; error: string } {
+  if (!isRecord(value)) {
+    return { success: false, error: 'Backup file must be a JSON object.' }
+  }
+  if (!isRecord(value.familyInfo)) {
+    return { success: false, error: 'Backup is missing family information.' }
+  }
+  if (!Array.isArray(value.checklistItems)) {
+    return { success: false, error: 'Backup is missing the checklist.' }
+  }
+
+  const adults = Number(value.familyInfo.adults)
+  const children = Number(value.familyInfo.children)
+  const pets = Number(value.familyInfo.pets)
+  if (![adults, children, pets].every(count => Number.isFinite(count) && count >= 0 && count <= 100)) {
+    return { success: false, error: 'Family counts in this backup are not valid.' }
+  }
+
+  for (const category of value.checklistItems) {
+    if (!isRecord(category) || typeof category.category !== 'string' || !Array.isArray(category.items)) {
+      return { success: false, error: 'Checklist categories in this backup are not valid.' }
+    }
+  }
+
+  const listFields = ['pantryItems', 'books', 'contacts', 'frequencies', 'documents'] as const
+  for (const field of listFields) {
+    if (value[field] !== undefined && !Array.isArray(value[field])) {
+      return { success: false, error: `The ${field} section must be a list.` }
+    }
+  }
+
+  return { success: true, data: value as unknown as ExportData }
 }

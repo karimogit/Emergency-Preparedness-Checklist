@@ -5,7 +5,7 @@
 
 'use client'
 
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react'
+import { createContext, useContext, ReactNode, useState, useEffect, useMemo } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { FamilyInfo, MetricsSettings, Theme } from '@/types'
 import { STORAGE_KEYS } from '@/lib/constants'
@@ -13,6 +13,7 @@ import { DEFAULT_FAMILY_INFO, DEFAULT_METRICS_SETTINGS } from '@/lib/defaultData
 
 interface AppContextType {
   theme: Theme
+  resolvedTheme: 'light' | 'dark'
   setTheme: (theme: Theme) => void
   familyInfo: FamilyInfo
   setFamilyInfo: (info: FamilyInfo | ((prev: FamilyInfo) => FamilyInfo)) => void
@@ -25,7 +26,11 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEYS.THEME, 'light')
+  const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEYS.THEME, 'system')
+  const [systemDark, setSystemDark] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
   const [familyInfo, setFamilyInfo] = useLocalStorage<FamilyInfo>(
     STORAGE_KEYS.FAMILY_INFO,
     DEFAULT_FAMILY_INFO
@@ -35,23 +40,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     DEFAULT_METRICS_SETTINGS
   )
 
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const sync = () => setSystemDark(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
+  const resolvedTheme: 'light' | 'dark' = theme === 'dark' || (theme === 'system' && systemDark)
+    ? 'dark'
+    : 'light'
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', resolvedTheme === 'dark')
+    document.documentElement.style.colorScheme = resolvedTheme
+  }, [resolvedTheme])
+
   // Handle initial loading state
   useEffect(() => {
     setIsLoading(false)
   }, [])
 
+  const value = useMemo(() => ({
+    theme,
+    resolvedTheme,
+    setTheme,
+    familyInfo,
+    setFamilyInfo,
+    metricsSettings,
+    setMetricsSettings,
+    isLoading
+  }), [theme, resolvedTheme, setTheme, familyInfo, setFamilyInfo, metricsSettings, setMetricsSettings, isLoading])
+
   return (
-    <AppContext.Provider
-      value={{
-        theme,
-        setTheme,
-        familyInfo,
-        setFamilyInfo,
-        metricsSettings,
-        setMetricsSettings,
-        isLoading
-      }}
-    >
+    <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   )
