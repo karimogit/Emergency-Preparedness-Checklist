@@ -169,7 +169,7 @@ export const EXPIRY_THRESHOLDS = {
 
 // App Configuration
 export const APP_CONFIG = {
-  VERSION: '1.1.0',
+  VERSION: '1.2.0',
   APP_NAME: 'Emergency Preparedness Checklist',
   APP_DESCRIPTION: 'Stay 10 steps ahead of the rest!',
   LOCAL_STORAGE_WARNING_THRESHOLD: 4.5 * 1024 * 1024, // 4.5MB warning (5MB limit)

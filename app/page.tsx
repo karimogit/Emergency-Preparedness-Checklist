@@ -5,8 +5,8 @@
 
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { Shield, Users, BookOpen, Radio, FileText, Download, Menu, X, Compass, Zap } from 'lucide-react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { Shield, Users, BookOpen, Radio, FileText, Download, Menu, X, Compass, Zap, MapPin } from 'lucide-react'
 import ChecklistSection from '@/components/ChecklistSection'
 import PantryManager from '@/components/PantryManager'
 import BooksManager from '@/components/BooksManager'
@@ -20,6 +20,7 @@ import { ToastProvider } from '@/components/Toast'
 import { AppProvider, useApp } from '@/contexts/AppContext'
 import { FamilyInfo, ChecklistItem } from '@/types'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { STORAGE_KEYS, APP_CONFIG } from '@/lib/constants'
 import { calculateProgress } from '@/lib/utils'
 import { DEFAULT_CHECKLIST } from '@/lib/defaultData'
@@ -50,10 +51,11 @@ function HomeContent() {
   }, [checklistItems])
 
   // Memoized total family members
-  const totalFamilyMembers = useMemo(() => 
-    familyInfo.adults + familyInfo.children + familyInfo.pets,
-    [familyInfo]
-  )
+  const household = useMemo(() => {
+    const people = (Number(familyInfo.adults) || 0) + (Number(familyInfo.children) || 0)
+    const pets = Number(familyInfo.pets) || 0
+    return { people, pets }
+  }, [familyInfo])
 
   // Optimized checklist update with useCallback
   const updateChecklistItem = useCallback((categoryId: number, itemId: string, completed: boolean) => {
@@ -70,10 +72,24 @@ function HomeContent() {
     }))
   }, [setChecklistItems])
 
-  // Optimized family info update
+  // Optimized family info update. Counts stay inside the planner's supported range.
   const updateFamilyInfo = useCallback((field: keyof FamilyInfo, value: string | number) => {
-    setFamilyInfo(prev => ({ ...prev, [field]: value }))
+    setFamilyInfo(prev => {
+      if (field === 'adults' || field === 'children' || field === 'pets') {
+        const numeric = typeof value === 'number' ? value : parseInt(String(value), 10)
+        const clamped = Number.isFinite(numeric) ? Math.min(20, Math.max(0, numeric)) : 0
+        return { ...prev, [field]: clamped }
+      }
+      return { ...prev, [field]: value }
+    })
   }, [setFamilyInfo])
+
+  const resetChecklist = useCallback(() => {
+    setChecklistItems(prev => prev.map(category => ({
+      ...category,
+      items: category.items.map(item => ({ ...item, completed: false }))
+    })))
+  }, [setChecklistItems])
 
   // Optimized metrics update
   const updateMetricsSettings = useCallback((field: string, value: string) => {
@@ -85,6 +101,18 @@ function HomeContent() {
     setActiveTab(tabId)
     setIsSidebarOpen(false)
   }, [])
+
+  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [])
+  useEscapeKey(isSidebarOpen, closeSidebar)
+
+  useEffect(() => {
+    if (!isSidebarOpen || window.matchMedia('(min-width: 1024px)').matches) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [isSidebarOpen])
 
   const tabs = [
     { id: 'checklist', label: 'Checklist', icon: Shield },
@@ -164,19 +192,29 @@ function HomeContent() {
       <div className="flex">
         {/* Sidebar - 20% */}
         <aside 
-          className={`${isSidebarOpen ? 'fixed inset-0 z-40 lg:relative lg:inset-auto' : 'hidden'} lg:block w-full lg:w-1/5 sidebar min-h-[calc(100vh-73px)] no-print`}
+          className={`${isSidebarOpen ? 'fixed inset-0 z-40 lg:static lg:inset-auto' : 'hidden'} lg:block lg:w-1/5 lg:min-h-[calc(100vh-73px)] no-print`}
           aria-label="Sidebar"
         >
           {/* Mobile backdrop */}
           {isSidebarOpen && (
             <div 
-              className="fixed inset-0 bg-forest-950/60 backdrop-blur-sm lg:hidden"
-              onClick={() => setIsSidebarOpen(false)}
+              className="absolute inset-0 bg-forest-950/60 backdrop-blur-sm lg:hidden"
+              onClick={closeSidebar}
               aria-hidden="true"
             />
           )}
           
-          <div className="relative z-10 bg-white dark:bg-forest-900 h-full p-5 overflow-y-auto lg:bg-transparent lg:dark:bg-transparent">
+          <div className="absolute inset-y-0 left-0 z-10 w-[min(100%,20rem)] overflow-y-auto bg-white p-5 shadow-xl dark:bg-forest-900 sidebar lg:static lg:h-full lg:w-full lg:shadow-none lg:min-h-[calc(100vh-73px)]">
+            <div className="mb-4 flex items-center justify-between lg:hidden">
+              <span className="text-sm font-bold uppercase tracking-wider text-forest-900 dark:text-sand-50">Household</span>
+              <button
+                onClick={closeSidebar}
+                className="rounded-xl p-2 text-forest-700 hover:bg-sand-100 focus:outline-none focus:ring-2 focus:ring-forest-500 dark:text-sand-300 dark:hover:bg-forest-800"
+                aria-label="Close sidebar"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
             {/* Family Info Section */}
             <div className="tactical-card p-5 mb-4 animate-fade-in-up stagger-1">
               <div className="flex items-center justify-between mb-4">
@@ -202,6 +240,7 @@ function HomeContent() {
                         id="adults"
                         type="number"
                         min="0"
+                        max="20"
                         value={familyInfo.adults}
                         onChange={(e) => updateFamilyInfo('adults', parseInt(e.target.value) || 0)}
                         className="input-field text-center text-sm py-2"
@@ -213,6 +252,7 @@ function HomeContent() {
                         id="children"
                         type="number"
                         min="0"
+                        max="20"
                         value={familyInfo.children}
                         onChange={(e) => updateFamilyInfo('children', parseInt(e.target.value) || 0)}
                         className="input-field text-center text-sm py-2"
@@ -224,11 +264,45 @@ function HomeContent() {
                         id="pets"
                         type="number"
                         min="0"
+                        max="20"
                         value={familyInfo.pets}
                         onChange={(e) => updateFamilyInfo('pets', parseInt(e.target.value) || 0)}
                         className="input-field text-center text-sm py-2"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label htmlFor="location" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Meeting place</label>
+                    <input
+                      id="location"
+                      type="text"
+                      value={familyInfo.location ?? ''}
+                      onChange={(e) => updateFamilyInfo('location', e.target.value)}
+                      placeholder="Home, school, or rally point"
+                      className="input-field text-sm py-2"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="specialNeeds" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Special needs</label>
+                    <textarea
+                      id="specialNeeds"
+                      value={familyInfo.specialNeeds ?? ''}
+                      onChange={(e) => updateFamilyInfo('specialNeeds', e.target.value)}
+                      placeholder="Medications, mobility, allergies"
+                      rows={2}
+                      className="input-field resize-none text-sm py-2"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="emergencyPlan" className="mb-1 block text-[10px] font-medium uppercase text-sand-500 dark:text-sand-400">Plan notes</label>
+                    <textarea
+                      id="emergencyPlan"
+                      value={familyInfo.emergencyPlan ?? ''}
+                      onChange={(e) => updateFamilyInfo('emergencyPlan', e.target.value)}
+                      placeholder="Out-of-town contact, evacuation route"
+                      rows={3}
+                      className="input-field resize-none text-sm py-2"
+                    />
                   </div>
                   <button
                     onClick={() => setIsEditingFamily(false)}
@@ -255,10 +329,32 @@ function HomeContent() {
                   <div className="mt-4 pt-4 border-t border-sand-200 dark:border-forest-700 text-center">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-forest-100 dark:bg-forest-800 border border-forest-200 dark:border-forest-700">
                       <span className="text-sm font-bold text-forest-700 dark:text-forest-300">
-                        Total: {totalFamilyMembers}
+                        {household.people} people{household.pets > 0 ? ` · ${household.pets} pets` : ''}
                       </span>
                     </div>
                   </div>
+                  {(familyInfo.location || familyInfo.specialNeeds || familyInfo.emergencyPlan) && (
+                    <div className="mt-4 space-y-2 text-left">
+                      {familyInfo.location && (
+                        <p className="flex items-start gap-2 text-xs text-sand-600 dark:text-sand-300">
+                          <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-forest-500" aria-hidden="true" />
+                          <span>{familyInfo.location}</span>
+                        </p>
+                      )}
+                      {familyInfo.specialNeeds && (
+                        <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-300">
+                          <span className="font-semibold text-forest-700 dark:text-forest-300">Needs: </span>
+                          {familyInfo.specialNeeds}
+                        </p>
+                      )}
+                      {familyInfo.emergencyPlan && (
+                        <p className="text-xs leading-relaxed text-sand-600 dark:text-sand-300">
+                          <span className="font-semibold text-forest-700 dark:text-forest-300">Plan: </span>
+                          {familyInfo.emergencyPlan}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -398,6 +494,7 @@ function HomeContent() {
                 <ChecklistSection 
                   checklistItems={checklistItems}
                   onUpdateItem={updateChecklistItem}
+                  onReset={resetChecklist}
                   familyInfo={familyInfo}
                   metricsSettings={metricsSettings}
                 />

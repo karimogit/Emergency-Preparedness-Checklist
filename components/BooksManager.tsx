@@ -9,10 +9,11 @@ import { useState, useMemo, useCallback } from 'react'
 import { Plus, BookOpen, MapPin, Star, Trash2, Edit, Search, X } from 'lucide-react'
 import { Book } from '@/types'
 import { useBooks } from '@/hooks/useBooks'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 import { BOOK_CATEGORIES, BOOK_CATEGORY_COLORS } from '@/lib/constants'
-import { getCategoryColor } from '@/lib/utils'
+import { getCategoryColor, matchesSearch } from '@/lib/utils'
 import { bookSchema, validateForm } from '@/lib/validations'
 
 const EMPTY_BOOK: Omit<Book, 'id'> = {
@@ -46,13 +47,7 @@ export default function BooksManager() {
 
   // Filter books based on search
   const filteredBooks = useMemo(() => {
-    if (!searchTerm.trim()) return books
-    const lower = searchTerm.toLowerCase()
-    return books.filter(book => 
-      book.title.toLowerCase().includes(lower) ||
-      book.author.toLowerCase().includes(lower) ||
-      book.category.toLowerCase().includes(lower)
-    )
+    return books.filter(book => matchesSearch(searchTerm, [book.title, book.author, book.category, book.location, book.notes]))
   }, [books, searchTerm])
 
   // Handle form submission
@@ -120,6 +115,8 @@ export default function BooksManager() {
     setNewBook(EMPTY_BOOK)
   }, [])
 
+  useEscapeKey(showAddModal || editingBook !== null, closeModal)
+
   const currentBook = editingBook || newBook
 
   return (
@@ -149,6 +146,8 @@ export default function BooksManager() {
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sand-400" aria-hidden="true" />
           <input
+            id="books-search"
+            name="books-search"
             type="text"
             placeholder="Search books..."
             value={searchTerm}

@@ -7,16 +7,16 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { Plus, AlertTriangle, Package, Trash2, Edit, Search, X, Calendar, Scale } from 'lucide-react'
-import { format } from 'date-fns'
 import { PantryItem, MetricsSettings } from '@/types'
 import { usePantryItems } from '@/hooks/usePantryItems'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 import { 
   PANTRY_CATEGORIES, 
   PANTRY_CATEGORY_COLORS 
 } from '@/lib/constants'
-import { getExpiryStatus, getCategoryColor } from '@/lib/utils'
+import { getExpiryStatus, getCategoryColor, formatDate, matchesSearch } from '@/lib/utils'
 import { pantryItemSchema, validateForm } from '@/lib/validations'
 
 interface PantryManagerProps {
@@ -57,13 +57,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
 
   // Filter items based on search
   const filteredItems = useMemo(() => {
-    if (!searchTerm.trim()) return pantryItems
-    const lower = searchTerm.toLowerCase()
-    return pantryItems.filter(item => 
-      item.name.toLowerCase().includes(lower) ||
-      item.category.toLowerCase().includes(lower) ||
-      item.notes.toLowerCase().includes(lower)
-    )
+    return pantryItems.filter(item => matchesSearch(searchTerm, [item.name, item.category, item.notes, item.unit]))
   }, [pantryItems, searchTerm])
 
   // Get units based on category
@@ -141,6 +135,8 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
     setNewItem(EMPTY_ITEM)
   }, [])
 
+  useEscapeKey(showAddModal || editingItem !== null, closeModal)
+
   const currentItem = editingItem || newItem
 
   return (
@@ -170,6 +166,8 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sand-400" aria-hidden="true" />
           <input
+            id="pantry-search"
+            name="pantry-search"
             type="text"
             placeholder="Search pantry items..."
             value={searchTerm}
@@ -293,7 +291,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                             expiryStatus.status === 'expiring' ? 'text-amber-600 dark:text-amber-400' :
                             'text-forest-600 dark:text-forest-400'
                           }`}>
-                            {format(new Date(item.expiryDate), 'MMM dd, yyyy')}
+                            {formatDate(item.expiryDate)}
                             {expiryStatus.status === 'expired' && ' (Expired)'}
                             {expiryStatus.status === 'expiring' && ` (${expiryStatus.days}d)`}
                           </span>

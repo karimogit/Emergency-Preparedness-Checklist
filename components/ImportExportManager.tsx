@@ -7,11 +7,32 @@
 
 import { useState, useRef, useCallback, useMemo } from 'react'
 import { Download, Upload, FileJson, FileSpreadsheet, FileText, Printer, Copy, Check, FileDown } from 'lucide-react'
-import { FamilyInfo, ChecklistItem, MetricsSettings } from '@/types'
+import { FamilyInfo, ChecklistItem, MetricsSettings, ExportData } from '@/types'
 import { useToast } from './Toast'
-import { downloadFile, copyToClipboard } from '@/lib/utils'
+import ConfirmDialog from './ConfirmDialog'
+import { downloadFile, copyToClipboard, escapeCsv } from '@/lib/utils'
 import { STORAGE_KEYS, APP_CONFIG } from '@/lib/constants'
 import { generatePDF } from '@/lib/pdfExport'
+import { parseBackup } from '@/lib/validations'
+import {
+  DEFAULT_BOOKS,
+  DEFAULT_CONTACTS,
+  DEFAULT_DOCUMENTS,
+  DEFAULT_HAM_FREQUENCIES,
+  DEFAULT_PANTRY_ITEMS,
+} from '@/lib/defaultData'
+
+function readStoredList<T>(key: string, fallback: T[]): T[] {
+  if (typeof window === 'undefined') return fallback
+  const raw = window.localStorage.getItem(key)
+  if (raw === null) return fallback
+  try {
+    const value = JSON.parse(raw) as unknown
+    return Array.isArray(value) ? value as T[] : fallback
+  } catch {
+    return fallback
+  }
+}
 
 interface ImportExportManagerProps {
   familyInfo: FamilyInfo
@@ -26,18 +47,19 @@ export default function ImportExportManager({
 }: ImportExportManagerProps) {
   const [copied, setCopied] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [pendingImport, setPendingImport] = useState<ExportData | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { showToast } = useToast()
 
-  const getAllData = useCallback(() => {
+  const getAllData = useCallback((): ExportData => {
     return {
       familyInfo,
       checklistItems,
-      pantryItems: JSON.parse(localStorage.getItem(STORAGE_KEYS.PANTRY_ITEMS) || '[]'),
-      books: JSON.parse(localStorage.getItem(STORAGE_KEYS.BOOKS) || '[]'),
-      contacts: JSON.parse(localStorage.getItem(STORAGE_KEYS.EMERGENCY_CONTACTS) || '[]'),
-      frequencies: JSON.parse(localStorage.getItem(STORAGE_KEYS.HAM_FREQUENCIES) || '[]'),
-      documents: JSON.parse(localStorage.getItem(STORAGE_KEYS.DOCUMENTS) || '[]'),
+      pantryItems: readStoredList(STORAGE_KEYS.PANTRY_ITEMS, DEFAULT_PANTRY_ITEMS),
+      books: readStoredList(STORAGE_KEYS.BOOKS, DEFAULT_BOOKS),
+      contacts: readStoredList(STORAGE_KEYS.EMERGENCY_CONTACTS, DEFAULT_CONTACTS),
+      frequencies: readStoredList(STORAGE_KEYS.HAM_FREQUENCIES, DEFAULT_HAM_FREQUENCIES),
+      documents: readStoredList(STORAGE_KEYS.DOCUMENTS, DEFAULT_DOCUMENTS),
       metricsSettings,
       exportDate: new Date().toISOString(),
       appVersion: APP_CONFIG.VERSION
@@ -57,18 +79,53 @@ export default function ImportExportManager({
 
   const handleExportCSV = useCallback(() => {
     const data = getAllData()
-    let csv = 'Category,Name,Details,Status\n'
-    
-    // Add checklist items
+    const rows = ['Type,Category,Name,Details,Status']
+
     data.checklistItems.forEach(category => {
       category.items.forEach(item => {
-        csv += `"${category.category}","${item.text}","Quantity: ${item.quantity}","${item.completed ? 'Completed' : 'Pending'}"\n`
+        rows.push([
+          escapeCsv('Checklist'),
+          escapeCsv(category.category),
+          escapeCsv(item.text),
+          escapeCsv(`Quantity: ${item.quantity}`),
+          escapeCsv(item.completed ? 'Completed' : 'Pending'),
+        ].join(','))
       })
+    })
+
+    data.pantryItems.forEach(item => {
+      rows.push([
+        escapeCsv('Pantry'),
+        escapeCsv(item.category),
+        escapeCsv(item.name),
+        escapeCsv(`${item.quantity} ${item.unit}; expires ${item.expiryDate || 'n/a'}`),
+        escapeCsv(item.notes),
+      ].join(','))
+    })
+
+    data.contacts.forEach(contact => {
+      rows.push([
+        escapeCsv('Contact'),
+        escapeCsv(contact.relationship),
+        escapeCsv(contact.name),
+        escapeCsv([contact.phone, contact.email, contact.address].filter(Boolean).join(' · ')),
+        escapeCsv(contact.isEmergencyContact ? 'Priority' : ''),
+      ].join(','))
+    })
+
+    data.documents.forEach(document => {
+      rows.push([
+        escapeCsv('Document'),
+        escapeCsv(document.category),
+        escapeCsv(document.name),
+        escapeCsv(document.location),
+        escapeCsv(document.isDigital ? 'Digital' : 'Physical'),
+      ].join(','))
     })
     
     downloadFile(
-      csv,
-      `emergency-prep-checklist-${new Date().toISOString().split('T')[0]}.csv`,
+      rows.join('\n'),
+      `emergency-prep-backup-${new Date().toISOString().split('T')[0]}.csv`,
       'text/csv'
     )
     showToast('success', 'Data exported as CSV successfully')
@@ -82,7 +139,11 @@ export default function ImportExportManager({
     text += `Family Information:\n`
     text += `- Adults: ${data.familyInfo.adults}\n`
     text += `- Children: ${data.familyInfo.children}\n`
-    text += `- Pets: ${data.familyInfo.pets}\n\n`
+    text += `- Pets: ${data.familyInfo.pets}\n`
+    if (data.familyInfo.location) text += `- Meeting place: ${data.familyInfo.location}\n`
+    if (data.familyInfo.specialNeeds) text += `- Special needs: ${data.familyInfo.specialNeeds}\n`
+    if (data.familyInfo.emergencyPlan) text += `- Plan: ${data.familyInfo.emergencyPlan}\n`
+    text += '\n'
     
     data.checklistItems.forEach(category => {
       text += `\n${category.category}:\n`
@@ -92,6 +153,24 @@ export default function ImportExportManager({
         text += `${status} ${item.text} (Qty: ${item.quantity})\n`
       })
     })
+
+    if (data.contacts.length > 0) {
+      text += '\nEmergency Contacts:\n'
+      text += '====================\n'
+      data.contacts.forEach(contact => {
+        text += `- ${contact.name} (${contact.relationship}): ${contact.phone}\n`
+      })
+    }
+
+    if (data.pantryItems.length > 0) {
+      text += '\nPantry:\n'
+      text += '=======\n'
+      data.pantryItems.forEach(item => {
+        text += `- ${item.name}: ${item.quantity} ${item.unit}`
+        if (item.expiryDate) text += `, expires ${item.expiryDate}`
+        text += '\n'
+      })
+    }
     
     downloadFile(
       text,
@@ -136,43 +215,12 @@ export default function ImportExportManager({
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string
-        const data = JSON.parse(content)
-        
-        // Validate the data structure
-        if (!data.familyInfo || !data.checklistItems) {
-          throw new Error('Invalid data format')
+        const parsed = parseBackup(JSON.parse(content))
+        if (!parsed.success) {
+          showToast('error', parsed.error)
+          return
         }
-
-        // Import data to localStorage
-        if (data.familyInfo) {
-          localStorage.setItem(STORAGE_KEYS.FAMILY_INFO, JSON.stringify(data.familyInfo))
-        }
-        if (data.checklistItems) {
-          localStorage.setItem(STORAGE_KEYS.CHECKLIST_ITEMS, JSON.stringify(data.checklistItems))
-        }
-        if (data.pantryItems) {
-          localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify(data.pantryItems))
-        }
-        if (data.books) {
-          localStorage.setItem(STORAGE_KEYS.BOOKS, JSON.stringify(data.books))
-        }
-        if (data.contacts) {
-          localStorage.setItem(STORAGE_KEYS.EMERGENCY_CONTACTS, JSON.stringify(data.contacts))
-        }
-        if (data.frequencies) {
-          localStorage.setItem(STORAGE_KEYS.HAM_FREQUENCIES, JSON.stringify(data.frequencies))
-        }
-        if (data.documents) {
-          localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(data.documents))
-        }
-        if (data.metricsSettings) {
-          localStorage.setItem(STORAGE_KEYS.METRICS_SETTINGS, JSON.stringify(data.metricsSettings))
-        }
-
-        showToast('success', 'Data imported successfully! Refreshing page...')
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
+        setPendingImport(parsed.data)
       } catch (error) {
         console.error('Import error:', error)
         showToast('error', 'Failed to import data. Please check the file format.')
@@ -193,6 +241,33 @@ export default function ImportExportManager({
       fileInputRef.current.value = ''
     }
   }, [showToast])
+
+  const applyImport = useCallback(() => {
+    if (!pendingImport) return
+    const data = pendingImport
+    localStorage.setItem(STORAGE_KEYS.FAMILY_INFO, JSON.stringify(data.familyInfo))
+    localStorage.setItem(STORAGE_KEYS.CHECKLIST_ITEMS, JSON.stringify(data.checklistItems))
+    if (Array.isArray(data.pantryItems)) {
+      localStorage.setItem(STORAGE_KEYS.PANTRY_ITEMS, JSON.stringify(data.pantryItems))
+    }
+    if (Array.isArray(data.books)) {
+      localStorage.setItem(STORAGE_KEYS.BOOKS, JSON.stringify(data.books))
+    }
+    if (Array.isArray(data.contacts)) {
+      localStorage.setItem(STORAGE_KEYS.EMERGENCY_CONTACTS, JSON.stringify(data.contacts))
+    }
+    if (Array.isArray(data.frequencies)) {
+      localStorage.setItem(STORAGE_KEYS.HAM_FREQUENCIES, JSON.stringify(data.frequencies))
+    }
+    if (Array.isArray(data.documents)) {
+      localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(data.documents))
+    }
+    if (data.metricsSettings) {
+      localStorage.setItem(STORAGE_KEYS.METRICS_SETTINGS, JSON.stringify(data.metricsSettings))
+    }
+    showToast('success', 'Data imported successfully! Refreshing page...')
+    window.setTimeout(() => window.location.reload(), 600)
+  }, [pendingImport, showToast])
 
   const counts = useMemo(() => {
     const data = getAllData()
@@ -362,9 +437,20 @@ export default function ImportExportManager({
           <li>• Export your data regularly to avoid losing important information</li>
           <li>• Store backups in multiple locations (cloud storage, USB drive, etc.)</li>
           <li>• JSON format is recommended for complete backup with all features</li>
-          <li>• CSV format is useful for importing into spreadsheet applications</li>
+          <li>• CSV and text exports include the checklist, pantry, contacts, and documents</li>
         </ul>
       </aside>
+
+      <ConfirmDialog
+        isOpen={pendingImport !== null}
+        title="Replace current data?"
+        message="Importing this backup overwrites the household, checklist, and any sections included in the file."
+        confirmText="Import backup"
+        cancelText="Cancel"
+        variant="warning"
+        onConfirm={applyImport}
+        onCancel={() => setPendingImport(null)}
+      />
     </div>
   )
 }

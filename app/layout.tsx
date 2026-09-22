@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Outfit, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
+
+const themeBootScript = `(function(){try{var raw=localStorage.getItem('theme');var theme=raw?JSON.parse(raw):'system';var systemDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var dark=theme==='dark'||(theme!=='light'&&systemDark);document.documentElement.classList.toggle('dark',dark);document.documentElement.style.colorScheme=dark?'dark':'light';}catch(e){}})();`
 
 const outfit = Outfit({ 
   subsets: ['latin'],
@@ -93,12 +96,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${sourceSerif.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${sourceSerif.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#1a2e1a" />
         <meta name="msapplication-TileColor" content="#1a2e1a" />
@@ -138,7 +139,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   )
 }

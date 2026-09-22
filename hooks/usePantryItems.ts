@@ -3,18 +3,26 @@
  * Custom hook for managing pantry items with localStorage
  */
 
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 import { PantryItem } from '@/types'
 import { STORAGE_KEYS } from '@/lib/constants'
 import { generateId, getExpiryStatus } from '@/lib/utils'
-import { DEFAULT_PANTRY_ITEMS } from '@/lib/defaultData'
+import { DEFAULT_PANTRY_ITEMS, migratePantryItems } from '@/lib/defaultData'
 
 export function usePantryItems() {
   const [items, setItems] = useLocalStorage<PantryItem[]>(
     STORAGE_KEYS.PANTRY_ITEMS,
     DEFAULT_PANTRY_ITEMS
   )
+  const migrated = useRef(false)
+
+  useEffect(() => {
+    if (migrated.current) return
+    migrated.current = true
+    const next = migratePantryItems(items)
+    if (next !== items) setItems(next)
+  }, [items, setItems])
 
   const addItem = useCallback((item: Omit<PantryItem, 'id'>) => {
     const newItem: PantryItem = {

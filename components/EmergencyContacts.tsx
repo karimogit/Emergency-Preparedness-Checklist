@@ -9,10 +9,11 @@ import { useState, useMemo, useCallback } from 'react'
 import { Plus, Phone, Mail, MapPin, Star, Trash2, Edit, Search, X, Users } from 'lucide-react'
 import { EmergencyContact } from '@/types'
 import { useContacts } from '@/hooks/useContacts'
+import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 import { CONTACT_RELATIONSHIPS, CONTACT_RELATIONSHIP_COLORS } from '@/lib/constants'
-import { getCategoryColor } from '@/lib/utils'
+import { getCategoryColor, matchesSearch } from '@/lib/utils'
 import { contactSchema, validateForm } from '@/lib/validations'
 
 const EMPTY_CONTACT: Omit<EmergencyContact, 'id'> = {
@@ -47,13 +48,14 @@ export default function EmergencyContacts() {
 
   // Filter contacts based on search
   const filteredContacts = useMemo(() => {
-    if (!searchTerm.trim()) return contacts
-    const lower = searchTerm.toLowerCase()
-    return contacts.filter(contact => 
-      contact.name.toLowerCase().includes(lower) ||
-      contact.relationship.toLowerCase().includes(lower) ||
-      contact.phone.toLowerCase().includes(lower)
-    )
+    return contacts.filter(contact => matchesSearch(searchTerm, [
+      contact.name,
+      contact.relationship,
+      contact.phone,
+      contact.email,
+      contact.address,
+      contact.notes,
+    ]))
   }, [contacts, searchTerm])
 
   // Handle form submission
@@ -121,6 +123,8 @@ export default function EmergencyContacts() {
     setNewContact(EMPTY_CONTACT)
   }, [])
 
+  useEscapeKey(showAddModal || editingContact !== null, closeModal)
+
   const currentContact = editingContact || newContact
 
   return (
@@ -150,6 +154,8 @@ export default function EmergencyContacts() {
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-sand-400" aria-hidden="true" />
           <input
+            id="contacts-search"
+            name="contacts-search"
             type="text"
             placeholder="Search contacts..."
             value={searchTerm}

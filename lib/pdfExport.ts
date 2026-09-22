@@ -4,6 +4,7 @@
  */
 
 import { FamilyInfo, ChecklistItem, PantryItem, EmergencyContact, Book, HamFrequency, Document } from '@/types'
+import { escapeHtml, formatDate } from '@/lib/utils'
 
 /**
  * Generate a printable HTML version of the data
@@ -53,23 +54,26 @@ export function generatePrintableHTML(data: {
         <p><strong>Adults:</strong> ${familyInfo.adults}</p>
         <p><strong>Children:</strong> ${familyInfo.children}</p>
         <p><strong>Pets:</strong> ${familyInfo.pets}</p>
-        <p><strong>Total Family Members:</strong> ${familyInfo.adults + familyInfo.children + familyInfo.pets}</p>
+        <p><strong>People:</strong> ${familyInfo.adults + familyInfo.children}</p>
+        ${familyInfo.location ? `<p><strong>Meeting place:</strong> ${escapeHtml(familyInfo.location)}</p>` : ''}
+        ${familyInfo.specialNeeds ? `<p><strong>Special needs:</strong> ${escapeHtml(familyInfo.specialNeeds)}</p>` : ''}
+        ${familyInfo.emergencyPlan ? `<p><strong>Plan:</strong> ${escapeHtml(familyInfo.emergencyPlan)}</p>` : ''}
       </div>
 
       <div class="section">
         <h2>Checklist Items</h2>
         ${checklistItems.map(category => `
-          <h3>${category.category}</h3>
+          <h3>${escapeHtml(category.category)}</h3>
           ${category.items.map(item => `
             <div class="item">
               <span class="checkbox ${item.completed ? 'completed' : ''}"></span>
-              ${item.text} (Qty: ${item.quantity})
+              ${escapeHtml(item.text)} (Qty: ${escapeHtml(item.quantity)})
             </div>
           `).join('')}
         `).join('')}
       </div>
 
-      ${pantryItems.length > 0 ? `
+      ${(pantryItems ?? []).length > 0 ? `
         <div class="section">
           <h2>Pantry Items</h2>
           <table>
@@ -79,19 +83,19 @@ export function generatePrintableHTML(data: {
               <th>Quantity</th>
               <th>Expiry Date</th>
             </tr>
-            ${pantryItems.map(item => `
+            ${(pantryItems ?? []).map(item => `
               <tr>
-                <td>${item.name}</td>
-                <td>${item.category}</td>
-                <td>${item.quantity} ${item.unit}</td>
-                <td>${new Date(item.expiryDate).toLocaleDateString()}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td>${escapeHtml(item.category)}</td>
+                <td>${escapeHtml(item.quantity)} ${escapeHtml(item.unit)}</td>
+                <td>${escapeHtml(item.expiryDate ? formatDate(item.expiryDate) : '')}</td>
               </tr>
             `).join('')}
           </table>
         </div>
       ` : ''}
 
-      ${contacts.length > 0 ? `
+      ${(contacts ?? []).length > 0 ? `
         <div class="section">
           <h2>Emergency Contacts</h2>
           <table>
@@ -101,19 +105,19 @@ export function generatePrintableHTML(data: {
               <th>Phone</th>
               <th>Email</th>
             </tr>
-            ${contacts.map(contact => `
+            ${(contacts ?? []).map(contact => `
               <tr>
-                <td>${contact.name}</td>
-                <td>${contact.relationship}</td>
-                <td>${contact.phone}</td>
-                <td>${contact.email || 'N/A'}</td>
+                <td>${escapeHtml(contact.name)}</td>
+                <td>${escapeHtml(contact.relationship)}</td>
+                <td>${escapeHtml(contact.phone)}</td>
+                <td>${escapeHtml(contact.email || 'N/A')}</td>
               </tr>
             `).join('')}
           </table>
         </div>
       ` : ''}
 
-      ${books.length > 0 ? `
+      ${(books ?? []).length > 0 ? `
         <div class="section">
           <h2>Essential Books</h2>
           <table>
@@ -123,19 +127,19 @@ export function generatePrintableHTML(data: {
               <th>Category</th>
               <th>Location</th>
             </tr>
-            ${books.map(book => `
+            ${(books ?? []).map(book => `
               <tr>
-                <td>${book.title}</td>
-                <td>${book.author}</td>
-                <td>${book.category}</td>
-                <td>${book.location}</td>
+                <td>${escapeHtml(book.title)}</td>
+                <td>${escapeHtml(book.author)}</td>
+                <td>${escapeHtml(book.category)}</td>
+                <td>${escapeHtml(book.location)}</td>
               </tr>
             `).join('')}
           </table>
         </div>
       ` : ''}
 
-      ${frequencies.length > 0 ? `
+      ${(frequencies ?? []).length > 0 ? `
         <div class="section">
           <h2>HAM Radio Frequencies</h2>
           <table>
@@ -144,18 +148,18 @@ export function generatePrintableHTML(data: {
               <th>Description</th>
               <th>Location/Type</th>
             </tr>
-            ${frequencies.map(freq => `
+            ${(frequencies ?? []).map(freq => `
               <tr>
-                <td>${freq.frequency}</td>
-                <td>${freq.description}</td>
-                <td>${freq.location}</td>
+                <td>${escapeHtml(freq.frequency)}</td>
+                <td>${escapeHtml(freq.description)}</td>
+                <td>${escapeHtml(freq.location)}</td>
               </tr>
             `).join('')}
           </table>
         </div>
       ` : ''}
 
-      ${documents.length > 0 ? `
+      ${(documents ?? []).length > 0 ? `
         <div class="section">
           <h2>Important Documents</h2>
           <table>
@@ -165,11 +169,11 @@ export function generatePrintableHTML(data: {
               <th>Location</th>
               <th>Type</th>
             </tr>
-            ${documents.map(doc => `
+            ${(documents ?? []).map(doc => `
               <tr>
-                <td>${doc.name}</td>
-                <td>${doc.category}</td>
-                <td>${doc.location}</td>
+                <td>${escapeHtml(doc.name)}</td>
+                <td>${escapeHtml(doc.category)}</td>
+                <td>${escapeHtml(doc.location)}</td>
                 <td>${doc.isDigital ? 'Digital' : 'Physical'}</td>
               </tr>
             `).join('')}
@@ -190,19 +194,32 @@ export function generatePrintableHTML(data: {
 /**
  * Trigger print dialog with custom content
  */
-export function printChecklist(data: any): void {
+export function printChecklist(data: {
+  familyInfo: FamilyInfo
+  checklistItems: ChecklistItem[]
+  pantryItems?: PantryItem[]
+  contacts?: EmergencyContact[]
+  books?: Book[]
+  frequencies?: HamFrequency[]
+  documents?: Document[]
+}): void {
   const printWindow = window.open('', '_blank')
-  if (printWindow) {
-    const html = generatePrintableHTML(data)
-    printWindow.document.write(html)
-    printWindow.document.close()
-    printWindow.focus()
-    
-    // Wait for content to load then print
-    printWindow.addEventListener('load', () => {
-      printWindow.print()
-    })
-  }
+  if (!printWindow) return
+
+  const html = generatePrintableHTML({
+    familyInfo: data.familyInfo,
+    checklistItems: data.checklistItems,
+    pantryItems: data.pantryItems ?? [],
+    contacts: data.contacts ?? [],
+    books: data.books ?? [],
+    frequencies: data.frequencies ?? [],
+    documents: data.documents ?? [],
+  })
+  printWindow.document.open()
+  printWindow.document.write(html)
+  printWindow.document.close()
+  printWindow.focus()
+  window.setTimeout(() => printWindow.print(), 250)
 }
 
 /**
