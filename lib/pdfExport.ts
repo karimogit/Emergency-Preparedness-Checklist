@@ -3,13 +3,12 @@
  * Handles PDF generation for checklists
  */
 
-import { FamilyInfo, ChecklistItem, PantryItem, EmergencyContact, Book, HamFrequency, Document } from '@/types'
-import { escapeHtml, formatDate } from '@/lib/utils'
+import { FamilyInfo, ChecklistItem, PantryItem, EmergencyContact, Book, HamFrequency, Document, MetricsSettings } from '@/types'
+import { escapeHtml, formatDate, formatSupplyWater, getSupplyTargets, localizeVolumeText } from '@/lib/utils'
+import { DEFAULT_METRICS_SETTINGS } from '@/lib/defaultData'
 
 /**
  * Generate a printable HTML version of the data
- * This is a basic implementation - for more advanced PDF features,
- * consider integrating a library like jsPDF or Puppeteer
  */
 export function generatePrintableHTML(data: {
   familyInfo: FamilyInfo
@@ -19,8 +18,19 @@ export function generatePrintableHTML(data: {
   books: Book[]
   frequencies: HamFrequency[]
   documents: Document[]
+  metricsSettings?: MetricsSettings
 }): string {
   const { familyInfo, checklistItems, pantryItems, contacts, books, frequencies, documents } = data
+  const metrics = data.metricsSettings ?? DEFAULT_METRICS_SETTINGS
+  const supplyTargets = getSupplyTargets(familyInfo)
+  const waterTarget = formatSupplyWater(supplyTargets, metrics.volume)
+
+  const displayItemText = (item: { id: string; text: string }) => {
+    if (item.id === 'water-1') {
+      return `Water — store ${waterTarget} for ${supplyTargets.days} days`
+    }
+    return localizeVolumeText(item.text || 'Untitled item', metrics.volume)
+  }
 
   return `
     <!DOCTYPE html>
@@ -30,24 +40,28 @@ export function generatePrintableHTML(data: {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Emergency Preparedness Checklist</title>
       <style>
+        body { font-family: Georgia, 'Times New Roman', serif; margin: 24px; color: #1a2e1a; line-height: 1.45; }
+        h1 { color: #254d25; border-bottom: 2px solid #3d7a3d; padding-bottom: 10px; font-size: 1.75rem; }
+        h2 { color: #2d5f2d; margin-top: 28px; font-size: 1.25rem; }
+        h3 { color: #3d7a3d; margin-top: 18px; font-size: 1.05rem; }
+        .section { page-break-inside: avoid; margin-bottom: 20px; }
+        .item { margin: 6px 0 6px 8px; }
+        .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #254d25; margin-right: 8px; vertical-align: middle; }
+        .completed { background-color: #3d7a3d; }
+        .meta { color: #5e4a35; font-size: 0.95rem; }
+        .target { background: #f0f7f0; border: 1px solid #bbd8bb; padding: 12px 14px; border-radius: 8px; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-family: system-ui, sans-serif; font-size: 0.9rem; }
+        th, td { border: 1px solid #dcebdc; padding: 8px; text-align: left; }
+        th { background-color: #f0f7f0; }
         @media print {
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1 { color: #8B4513; border-bottom: 2px solid #8B4513; padding-bottom: 10px; }
-          h2 { color: #555; margin-top: 30px; }
-          h3 { color: #666; margin-top: 20px; }
-          .section { page-break-inside: avoid; margin-bottom: 20px; }
-          .item { margin-left: 20px; }
-          .checkbox { display: inline-block; width: 15px; height: 15px; border: 1px solid #000; margin-right: 10px; }
-          .completed { background-color: #8B4513; }
-          table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f0f0f0; }
+          body { margin: 16px; }
+          .section { page-break-inside: avoid; }
         }
       </style>
     </head>
     <body>
       <h1>Emergency Preparedness Checklist</h1>
-      <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+      <p class="meta"><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
       
       <div class="section">
         <h2>Family Information</h2>
@@ -58,6 +72,10 @@ export function generatePrintableHTML(data: {
         ${familyInfo.location ? `<p><strong>Meeting place:</strong> ${escapeHtml(familyInfo.location)}</p>` : ''}
         ${familyInfo.specialNeeds ? `<p><strong>Special needs:</strong> ${escapeHtml(familyInfo.specialNeeds)}</p>` : ''}
         ${familyInfo.emergencyPlan ? `<p><strong>Plan:</strong> ${escapeHtml(familyInfo.emergencyPlan)}</p>` : ''}
+        <div class="target">
+          <strong>72-hour drinking water target:</strong> ${escapeHtml(waterTarget)}
+          <span class="meta"> (volume unit: ${escapeHtml(metrics.volume)})</span>
+        </div>
       </div>
 
       <div class="section">
@@ -67,7 +85,7 @@ export function generatePrintableHTML(data: {
           ${category.items.map(item => `
             <div class="item">
               <span class="checkbox ${item.completed ? 'completed' : ''}"></span>
-              ${escapeHtml(item.text)} (Qty: ${escapeHtml(item.quantity)})
+              ${escapeHtml(displayItemText(item))}
             </div>
           `).join('')}
         `).join('')}
@@ -202,6 +220,7 @@ export function printChecklist(data: {
   books?: Book[]
   frequencies?: HamFrequency[]
   documents?: Document[]
+  metricsSettings?: MetricsSettings
 }): void {
   const printWindow = window.open('', '_blank')
   if (!printWindow) return
@@ -214,6 +233,7 @@ export function printChecklist(data: {
     books: data.books ?? [],
     frequencies: data.frequencies ?? [],
     documents: data.documents ?? [],
+    metricsSettings: data.metricsSettings,
   })
   printWindow.document.open()
   printWindow.document.write(html)

@@ -10,7 +10,7 @@ import { Download, Upload, FileJson, FileSpreadsheet, FileText, Printer, Copy, C
 import { FamilyInfo, ChecklistItem, MetricsSettings, ExportData } from '@/types'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
-import { downloadFile, copyToClipboard, escapeCsv } from '@/lib/utils'
+import { downloadFile, copyToClipboard, escapeCsv, formatSupplyWater, getSupplyTargets, localizeVolumeText } from '@/lib/utils'
 import { STORAGE_KEYS, APP_CONFIG } from '@/lib/constants'
 import { generatePDF } from '@/lib/pdfExport'
 import { parseBackup } from '@/lib/validations'
@@ -133,6 +133,9 @@ export default function ImportExportManager({
 
   const handleExportText = useCallback(() => {
     const data = getAllData()
+    const targets = getSupplyTargets(data.familyInfo)
+    const waterTarget = formatSupplyWater(targets, data.metricsSettings.volume)
+
     let text = '=== EMERGENCY PREPAREDNESS CHECKLIST ===\n\n'
     
     text += `Export Date: ${new Date().toLocaleString()}\n\n`
@@ -143,6 +146,8 @@ export default function ImportExportManager({
     if (data.familyInfo.location) text += `- Meeting place: ${data.familyInfo.location}\n`
     if (data.familyInfo.specialNeeds) text += `- Special needs: ${data.familyInfo.specialNeeds}\n`
     if (data.familyInfo.emergencyPlan) text += `- Plan: ${data.familyInfo.emergencyPlan}\n`
+    text += `- 72-hour water target: ${waterTarget}\n`
+    text += `- Preferred volume unit: ${data.metricsSettings.volume}\n`
     text += '\n'
     
     data.checklistItems.forEach(category => {
@@ -150,7 +155,10 @@ export default function ImportExportManager({
       text += '=' + '='.repeat(category.category.length) + '\n'
       category.items.forEach(item => {
         const status = item.completed ? '[✓]' : '[ ]'
-        text += `${status} ${item.text} (Qty: ${item.quantity})\n`
+        const label = item.id === 'water-1'
+          ? `Water — store ${waterTarget} for ${targets.days} days`
+          : localizeVolumeText(item.text, data.metricsSettings.volume)
+        text += `${status} ${label}\n`
       })
     })
 
@@ -195,9 +203,9 @@ export default function ImportExportManager({
   }, [getAllData, showToast])
 
   const handlePrint = useCallback(() => {
-    window.print()
-    showToast('info', 'Opening print dialog')
-  }, [showToast])
+    generatePDF(getAllData())
+    showToast('info', 'Opening printable checklist')
+  }, [getAllData, showToast])
 
   const handleExportPDF = useCallback(() => {
     const data = getAllData()

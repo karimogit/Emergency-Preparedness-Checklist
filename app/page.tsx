@@ -171,7 +171,7 @@ function HomeContent() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-base sm:text-xl font-bold text-forest-900 dark:text-sand-50 tracking-tight leading-tight">
+                  <h1 className="font-serif text-lg sm:text-2xl font-semibold text-forest-950 dark:text-sand-50 tracking-tight leading-tight">
                     {APP_CONFIG.APP_NAME}
                   </h1>
                   <p className="text-sm text-sand-500 dark:text-forest-400 hidden sm:block">
@@ -371,7 +371,7 @@ function HomeContent() {
                   className="text-xs font-medium text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors focus:outline-none focus:underline"
                   aria-label={isEditingMetrics ? 'Save unit settings' : 'Edit unit settings'}
                 >
-                  {isEditingMetrics ? 'Save' : 'Edit'}
+                  {isEditingMetrics ? 'Done' : 'Edit'}
                 </button>
               </div>
 
@@ -389,6 +389,9 @@ function HomeContent() {
                       <option value="liters">Liters</option>
                       <option value="quarts">Quarts</option>
                     </select>
+                    <p className="mt-1.5 text-[11px] leading-snug text-sand-500 dark:text-sand-400">
+                      Checklist water targets and tips use this unit.
+                    </p>
                   </div>
                   <div>
                     <label htmlFor="weight" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Weight</label>
@@ -403,18 +406,39 @@ function HomeContent() {
                       <option value="ounces">Ounces</option>
                     </select>
                   </div>
-                  <button
-                    onClick={() => setIsEditingMetrics(false)}
-                    className="btn-primary w-full text-sm"
-                  >
-                    Save Changes
-                  </button>
+                  <div>
+                    <label htmlFor="temperature" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Temperature</label>
+                    <select
+                      id="temperature"
+                      value={metricsSettings.temperature}
+                      onChange={(e) => updateMetricsSettings('temperature', e.target.value)}
+                      className="select-field text-sm"
+                    >
+                      <option value="fahrenheit">Fahrenheit</option>
+                      <option value="celsius">Celsius</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="distance" className="block text-xs font-medium text-sand-500 dark:text-sand-400 mb-1.5">Distance</label>
+                    <select
+                      id="distance"
+                      value={metricsSettings.distance}
+                      onChange={(e) => updateMetricsSettings('distance', e.target.value)}
+                      className="select-field text-sm"
+                    >
+                      <option value="miles">Miles</option>
+                      <option value="kilometers">Kilometers</option>
+                      <option value="feet">Feet</option>
+                    </select>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {[
                     { label: 'Volume', value: metricsSettings.volume },
                     { label: 'Weight', value: metricsSettings.weight },
+                    { label: 'Temp', value: metricsSettings.temperature },
+                    { label: 'Distance', value: metricsSettings.distance },
                   ].map((item) => (
                     <div key={item.label} className="flex justify-between items-center py-2 px-3 rounded-lg bg-sand-50 dark:bg-forest-800/50">
                       <span className="text-xs font-medium text-sand-500 dark:text-sand-400 uppercase tracking-wide">{item.label}</span>

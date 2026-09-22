@@ -40,6 +40,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     DEFAULT_METRICS_SETTINGS
   )
 
+  // Older saves may lack temperature/distance; keep volume/weight and fill the rest.
+  const normalizedMetrics: MetricsSettings = {
+    ...DEFAULT_METRICS_SETTINGS,
+    ...metricsSettings,
+  }
+
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     const sync = () => setSystemDark(media.matches)
@@ -68,10 +74,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTheme,
     familyInfo,
     setFamilyInfo,
-    metricsSettings,
+    metricsSettings: normalizedMetrics,
     setMetricsSettings,
     isLoading
-  }), [theme, resolvedTheme, setTheme, familyInfo, setFamilyInfo, metricsSettings, setMetricsSettings, isLoading])
+  }), [theme, resolvedTheme, setTheme, familyInfo, setFamilyInfo, normalizedMetrics, setMetricsSettings, isLoading])
 
   return (
     <AppContext.Provider value={value}>

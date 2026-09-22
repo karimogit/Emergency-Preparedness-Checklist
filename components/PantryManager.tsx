@@ -60,14 +60,21 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
     return pantryItems.filter(item => matchesSearch(searchTerm, [item.name, item.category, item.notes, item.unit]))
   }, [pantryItems, searchTerm])
 
-  // Get units based on category
-  const getUnitsForCategory = useCallback((category: string) => {
+  // Get units based on category. Always keep the current unit so edits stay valid
+  // when the preferred volume/weight setting changes.
+  const getUnitsForCategory = useCallback((category: string, currentUnit?: string) => {
+    let options: string[]
     if (category === 'Beverages') {
-      return [metricsSettings.volume, 'bottles', 'cans', 'units']
+      options = [metricsSettings.volume, 'bottles', 'cans', 'units']
     } else if (category === 'Baking Supplies') {
-      return [metricsSettings.weight, 'cups', 'tablespoons', 'teaspoons', 'units']
+      options = [metricsSettings.weight, 'cups', 'tablespoons', 'teaspoons', 'units']
+    } else {
+      options = ['units', 'cans', 'boxes', 'bags', 'bottles', 'jars', metricsSettings.weight, 'ounces', 'grams']
     }
-    return ['units', 'cans', 'boxes', 'bags', 'bottles', 'jars', metricsSettings.weight, 'ounces', 'grams']
+    if (currentUnit && !options.includes(currentUnit)) {
+      options = [currentUnit, ...options]
+    }
+    return Array.from(new Set(options))
   }, [metricsSettings])
 
   // Handle form submission
@@ -419,7 +426,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                     onChange={(e) => handleInputChange('unit', e.target.value)}
                     className="select-field"
                   >
-                    {getUnitsForCategory(currentItem.category).map(unit => (
+                    {getUnitsForCategory(currentItem.category, currentItem.unit).map(unit => (
                       <option key={unit} value={unit}>{unit}</option>
                     ))}
                   </select>
