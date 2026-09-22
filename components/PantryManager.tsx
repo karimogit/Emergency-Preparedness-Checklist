@@ -282,7 +282,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sand-500 dark:text-sand-400">Qty:</span>
                           <span className="font-semibold text-forest-700 dark:text-forest-300">{item.quantity} {item.unit}</span>
@@ -291,7 +291,7 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                           <span className="text-sand-500 dark:text-sand-400">Min:</span>
                           <span className="font-medium text-sand-600 dark:text-sand-300">{item.minQuantity} {item.unit}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-sand-500 dark:text-sand-400">Expires:</span>
                           <span className={`font-medium ${
                             expiryStatus.status === 'expired' ? 'text-red-600 dark:text-red-400' :
@@ -304,9 +304,9 @@ export default function PantryManager({ metricsSettings }: PantryManagerProps) {
                           </span>
                         </div>
                         {item.notes && (
-                          <div className="col-span-2 md:col-span-1">
+                          <div className="sm:col-span-2 md:col-span-1">
                             <span className="text-sand-500 dark:text-sand-400">Notes:</span>
-                            <span className="ml-1 text-sand-600 dark:text-sand-300">{item.notes}</span>
+                            <span className="ml-1 break-words text-sand-600 dark:text-sand-300">{item.notes}</span>
                           </div>
                         )}
                       </div>

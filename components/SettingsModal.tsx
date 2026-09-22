@@ -71,7 +71,7 @@ export default function SettingsModal({
               <h2 id="settings-title" className="font-serif text-lg font-semibold text-forest-950 dark:text-sand-50">
                 Settings
               </h2>
-              <p className="truncate text-xs text-sand-500 dark:text-forest-400">
+              <p className="hidden text-xs text-sand-500 dark:text-forest-400 sm:block">
                 Household, units, appearance, and data
               </p>
             </div>

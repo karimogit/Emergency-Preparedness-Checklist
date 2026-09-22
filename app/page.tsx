@@ -166,9 +166,9 @@ function HomeContent() {
                   <Zap className="h-2 w-2 text-amber-900 sm:h-2.5 sm:w-2.5" aria-hidden="true" />
                 </div>
               </div>
-              <div className="min-w-0">
-                <h1 className="truncate font-serif text-base font-semibold leading-tight tracking-tight text-forest-950 dark:text-sand-50 sm:text-2xl">
-                  <span className="sm:hidden">Emergency Checklist</span>
+              <div className="min-w-0 flex-1">
+                <h1 className="font-serif text-base font-semibold leading-tight tracking-tight text-forest-950 dark:text-sand-50 sm:truncate sm:text-2xl">
+                  <span className="sm:hidden">Checklist</span>
                   <span className="hidden sm:inline">{APP_CONFIG.APP_NAME}</span>
                 </h1>
                 <p className="hidden text-sm text-sand-500 dark:text-forest-400 sm:block">
