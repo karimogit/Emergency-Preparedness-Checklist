@@ -62,7 +62,7 @@ export default function SettingsContent({
 
   if (activeSettingsTab === 'settings-family') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
           <Users className="h-5 w-5 text-forest-600 dark:text-forest-400" />
           <h2 className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50">Family</h2>
@@ -197,7 +197,7 @@ export default function SettingsContent({
 
   if (activeSettingsTab === 'settings-units') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
           <Compass className="h-5 w-5 text-forest-600 dark:text-forest-400" />
           <h2 className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50">Units</h2>
@@ -308,7 +308,7 @@ export default function SettingsContent({
 
   if (activeSettingsTab === 'settings-appearance') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
           <Type className="h-5 w-5 text-forest-600 dark:text-forest-400" />
           <h2 className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50">Font & Size</h2>
@@ -371,7 +371,7 @@ export default function SettingsContent({
 
   if (activeSettingsTab === 'settings-data') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
           <Download className="h-5 w-5 text-forest-600 dark:text-forest-400" />
           <h2 className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50">Data</h2>
@@ -387,7 +387,7 @@ export default function SettingsContent({
 
   if (activeSettingsTab === 'settings-progress') {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
           <BarChart3 className="h-5 w-5 text-forest-600 dark:text-forest-400" />
           <h2 className="font-serif text-xl font-semibold text-forest-950 dark:text-sand-50">Overall Progress</h2>

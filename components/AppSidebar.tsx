@@ -48,13 +48,13 @@ export default function AppSidebar({
 
       <aside
         id="main-navigation"
-        className={`sidebar no-print fixed bottom-0 left-0 top-[4.75rem] z-30 flex w-64 flex-col transition-transform duration-300 ease-in-out ${
+        className={`sidebar no-print fixed bottom-0 left-0 top-14 z-30 flex w-[min(18rem,85vw)] flex-col transition-transform duration-300 ease-in-out sm:top-[4.75rem] lg:w-64 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Main navigation"
         aria-hidden={!isOpen}
       >
-        <div className="flex h-full flex-col overflow-y-auto p-4">
+        <div className="flex h-full flex-col overflow-y-auto p-3 sm:p-4">
           <nav className="flex-1 space-y-1" aria-label="Menu">
             {MAIN_NAV_ITEMS.map((item) => {
               const Icon = item.icon
@@ -67,7 +67,7 @@ export default function AppSidebar({
                   className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                  <Icon className="h-5 w-5 flex-shrink-0 sm:h-4 sm:w-4" aria-hidden="true" />
                   <span>{item.label}</span>
                 </button>
               )

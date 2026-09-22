@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Outfit, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
@@ -90,6 +90,16 @@ export const metadata: Metadata = {
   classification: 'Emergency Preparedness Tool',
 }
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#dce6d6' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a2e1a' },
+  ],
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -101,7 +111,6 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1a2e1a" />
         <meta name="msapplication-TileColor" content="#1a2e1a" />
         
         {/* Structured Data */}

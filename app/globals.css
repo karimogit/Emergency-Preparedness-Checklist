@@ -290,7 +290,7 @@
 
   /* Category pill */
   .category-pill {
-    @apply inline-flex items-center px-3 py-1.5 rounded-lg;
+    @apply inline-flex items-center px-3 py-2.5 rounded-lg sm:py-1.5;
     @apply text-sm font-medium transition-all duration-200 cursor-pointer;
     @apply bg-white dark:bg-forest-800 text-sand-700 dark:text-sand-200;
     @apply border border-sand-300 dark:border-forest-600;
@@ -328,14 +328,16 @@
   .modal-overlay {
     @apply fixed inset-0 z-[60];
     @apply bg-forest-950/60 dark:bg-forest-950/80 backdrop-blur-sm;
-    @apply flex items-center justify-center p-4;
+    @apply flex items-end justify-center p-0 sm:items-center sm:p-4;
+    padding-bottom: env(safe-area-inset-bottom);
     animation: fadeIn 0.2s ease-out;
   }
 
   .modal-content {
-    @apply bg-white dark:bg-[#173017] rounded-2xl shadow-2xl;
-    @apply max-w-lg w-full max-h-[90vh] overflow-hidden;
+    @apply bg-white dark:bg-[#173017] shadow-2xl;
+    @apply w-full max-h-[92dvh] overflow-hidden;
     @apply border border-sand-300 dark:border-forest-600;
+    @apply rounded-t-2xl sm:max-w-lg sm:rounded-2xl;
     animation: scaleIn 0.2s ease-out;
   }
 
@@ -347,7 +349,7 @@
   }
 
   .sidebar-nav-item {
-    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium;
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium sm:py-2.5;
     @apply text-sand-600 dark:text-sand-300;
     @apply transition-colors duration-150;
     @apply hover:bg-sand-100 dark:hover:bg-forest-800;
@@ -382,12 +384,12 @@
   .section-header {
     @apply bg-gradient-to-r from-forest-50 via-forest-50/50 to-sand-50;
     @apply dark:from-forest-800/50 dark:via-forest-800/30 dark:to-forest-900/50;
-    @apply px-6 py-4 border-b border-sand-300 dark:border-forest-600;
+    @apply px-4 py-3 sm:px-6 sm:py-4 border-b border-sand-300 dark:border-forest-600;
   }
 
   /* Tips box */
   .tips-box {
-    @apply relative overflow-hidden rounded-xl p-6;
+    @apply relative overflow-hidden rounded-xl p-4 sm:p-6;
     @apply bg-gradient-to-br from-forest-50 via-forest-50/80 to-amber-50/50;
     @apply dark:from-forest-800/40 dark:via-forest-800/25 dark:to-amber-900/15;
     @apply border border-forest-300 dark:border-forest-600;
@@ -399,9 +401,40 @@
     @apply bg-gradient-to-br from-amber-200/30 to-transparent rounded-full blur-2xl;
     @apply dark:from-amber-400/10;
   }
+
+  /* Horizontally scrollable chip/filter row with edge fade */
+  .chip-scroll {
+    @apply relative -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-none snap-x snap-mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chip-scroll > * {
+    @apply shrink-0 snap-start;
+  }
 }
 
 @layer utilities {
+  /* Minimum 44px touch target for primary controls on narrow screens */
+  .touch-target {
+    @apply inline-flex items-center justify-center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    @apply p-2.5;
+  }
+
+  /* Horizontal safe-area padding for notched devices */
+  .safe-px {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  @media (min-width: 640px) {
+    .safe-px {
+      padding-left: max(1.5rem, env(safe-area-inset-left));
+      padding-right: max(1.5rem, env(safe-area-inset-right));
+    }
+  }
+
   /* Hide scrollbars while keeping the element scrollable */
   .scrollbar-none {
     scrollbar-width: none;

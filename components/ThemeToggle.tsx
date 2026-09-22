@@ -21,7 +21,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="relative p-2.5 rounded-xl bg-sand-100 dark:bg-forest-800 hover:bg-sand-200 dark:hover:bg-forest-700 border border-sand-200 dark:border-forest-700 transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 focus:ring-offset-sand-50 dark:focus:ring-offset-forest-950"
+      className="touch-target relative rounded-xl border border-sand-200 bg-sand-100 transition-all duration-300 group hover:bg-sand-200 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 focus:ring-offset-sand-50 dark:border-forest-700 dark:bg-forest-800 dark:hover:bg-forest-700 dark:focus:ring-offset-forest-950"
       aria-label={label}
       title={theme === 'system' ? `${label}. Currently matching your system theme.` : label}
     >

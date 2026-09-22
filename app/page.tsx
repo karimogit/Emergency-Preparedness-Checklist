@@ -25,6 +25,8 @@ import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { STORAGE_KEYS, APP_CONFIG } from '@/lib/constants'
 import { DEFAULT_CHECKLIST } from '@/lib/defaultData'
 
+const DESKTOP_MQ = '(min-width: 1024px)'
+
 /**
  * Main content wrapper component
  */
@@ -35,8 +37,26 @@ function HomeContent() {
     DEFAULT_CHECKLIST
   )
   const [activeTab, setActiveTab] = useState('checklist')
-  const [isSidebarOpen, setIsSidebarOpen] = useLocalStorage(STORAGE_KEYS.SIDEBAR_OPEN, true)
+  // Persist open/closed only for desktop; mobile drawer always starts closed
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useLocalStorage(STORAGE_KEYS.SIDEBAR_OPEN, true)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia(DESKTOP_MQ).matches
+  )
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+
+  const isSidebarOpen = isDesktop ? desktopSidebarOpen : mobileNavOpen
+
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_MQ)
+    const sync = () => {
+      setIsDesktop(mq.matches)
+      if (!mq.matches) setMobileNavOpen(false)
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const updateChecklistItem = useCallback((categoryId: number, itemId: string, completed: boolean) => {
     setChecklistItems(prev => prev.map(category => {
@@ -76,28 +96,30 @@ function HomeContent() {
 
   const handleNavigate = useCallback((tabId: string) => {
     setActiveTab(tabId)
-    if (window.matchMedia('(max-width: 1023px)').matches) {
-      setIsSidebarOpen(false)
-    }
-  }, [setIsSidebarOpen])
+    setMobileNavOpen(false)
+  }, [])
 
   const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen(prev => !prev)
-  }, [setIsSidebarOpen])
+    if (window.matchMedia(DESKTOP_MQ).matches) {
+      setDesktopSidebarOpen(prev => !prev)
+    } else {
+      setMobileNavOpen(prev => !prev)
+    }
+  }, [setDesktopSidebarOpen])
 
-  const closeSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen])
+  const closeSidebar = useCallback(() => setMobileNavOpen(false), [])
   const closeSettings = useCallback(() => setIsSettingsOpen(false), [])
 
-  useEscapeKey(isSidebarOpen && !isSettingsOpen, closeSidebar)
+  useEscapeKey(mobileNavOpen && !isSettingsOpen, closeSidebar)
 
   useEffect(() => {
-    if (!isSidebarOpen || window.matchMedia('(min-width: 1024px)').matches) return
+    if (!mobileNavOpen || isDesktop) return
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = previous
     }
-  }, [isSidebarOpen])
+  }, [mobileNavOpen, isDesktop])
 
   if (isLoading) {
     return (
@@ -118,13 +140,13 @@ function HomeContent() {
   return (
     <div className="min-h-screen">
       <header className="header sticky top-0 z-40 no-print" role="banner">
-        <div className="px-4 sm:px-6">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex min-w-0 items-center gap-4">
+        <div className="safe-px px-3 sm:px-6">
+          <div className="flex h-14 items-center justify-between gap-2 sm:h-[4.75rem] sm:gap-3">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={toggleSidebar}
-                className="shrink-0 rounded-xl bg-sand-100 p-2.5 transition-colors hover:bg-sand-200 focus:outline-none focus:ring-2 focus:ring-forest-500 dark:bg-forest-800 dark:hover:bg-forest-700"
+                className="touch-target shrink-0 rounded-xl bg-sand-100 transition-colors hover:bg-sand-200 focus:outline-none focus:ring-2 focus:ring-forest-500 dark:bg-forest-800 dark:hover:bg-forest-700"
                 aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isSidebarOpen}
                 aria-controls="main-navigation"
@@ -136,17 +158,18 @@ function HomeContent() {
                 )}
               </button>
 
-              <div className="relative shrink-0">
-                <div className="icon-container flex h-12 w-12 items-center justify-center rounded-xl">
-                  <Shield className="h-6 w-6 text-forest-600 dark:text-forest-400" aria-hidden="true" />
+              <div className="relative hidden shrink-0 min-[400px]:block">
+                <div className="icon-container flex h-9 w-9 items-center justify-center rounded-lg sm:h-12 sm:w-12 sm:rounded-xl">
+                  <Shield className="h-5 w-5 text-forest-600 dark:text-forest-400 sm:h-6 sm:w-6" aria-hidden="true" />
                 </div>
-                <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400">
-                  <Zap className="h-2.5 w-2.5 text-amber-900" aria-hidden="true" />
+                <div className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-400 sm:h-4 sm:w-4">
+                  <Zap className="h-2 w-2 text-amber-900 sm:h-2.5 sm:w-2.5" aria-hidden="true" />
                 </div>
               </div>
               <div className="min-w-0">
-                <h1 className="font-serif text-lg font-semibold leading-tight tracking-tight text-forest-950 dark:text-sand-50 sm:text-2xl">
-                  {APP_CONFIG.APP_NAME}
+                <h1 className="truncate font-serif text-base font-semibold leading-tight tracking-tight text-forest-950 dark:text-sand-50 sm:text-2xl">
+                  <span className="sm:hidden">Emergency Checklist</span>
+                  <span className="hidden sm:inline">{APP_CONFIG.APP_NAME}</span>
                 </h1>
                 <p className="hidden text-sm text-sand-500 dark:text-forest-400 sm:block">
                   {APP_CONFIG.APP_DESCRIPTION}
@@ -154,11 +177,11 @@ function HomeContent() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(true)}
-                className="relative rounded-xl border border-sand-200 bg-sand-100 p-2.5 transition-all duration-300 hover:bg-sand-200 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 focus:ring-offset-sand-50 dark:border-forest-700 dark:bg-forest-800 dark:hover:bg-forest-700 dark:focus:ring-offset-forest-950"
+                className="touch-target relative rounded-xl border border-sand-200 bg-sand-100 transition-all duration-300 hover:bg-sand-200 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:ring-offset-2 focus:ring-offset-sand-50 dark:border-forest-700 dark:bg-forest-800 dark:hover:bg-forest-700 dark:focus:ring-offset-forest-950"
                 aria-label="Open settings"
                 aria-expanded={isSettingsOpen}
                 aria-controls="settings-dialog"
@@ -190,12 +213,12 @@ function HomeContent() {
       />
 
       <main
-        className={`min-h-[calc(100vh-73px)] transition-[margin] duration-300 ease-in-out ${
+        className={`min-h-[calc(100dvh-3.5rem)] transition-[margin] duration-300 ease-in-out sm:min-h-[calc(100dvh-4.75rem)] ${
           isSidebarOpen ? 'lg:ml-64' : ''
         }`}
         id="main-content"
       >
-        <div className="p-4 sm:p-6">
+        <div className="safe-px p-2 sm:p-6">
           <div className="tactical-card animate-fade-in-up">
             {activeTab === 'checklist' && (
               <ChecklistSection 
