@@ -145,7 +145,7 @@ function HomeContent() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="header sticky top-0 z-30 no-print" role="banner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <button
@@ -171,7 +171,7 @@ function HomeContent() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-forest-900 dark:text-sand-50 tracking-tight">
+                  <h1 className="text-base sm:text-xl font-bold text-forest-900 dark:text-sand-50 tracking-tight leading-tight">
                     {APP_CONFIG.APP_NAME}
                   </h1>
                   <p className="text-sm text-sand-500 dark:text-forest-400 hidden sm:block">
@@ -321,7 +321,7 @@ function HomeContent() {
                     ].map((item, i) => (
                       <div key={item.label} className={`p-2 rounded-lg bg-sand-50 dark:bg-forest-800/50 border border-sand-200 dark:border-forest-700 animate-scale-in stagger-${i + 1} min-w-0`}>
                         <div className="text-xl font-bold text-forest-600 dark:text-forest-400">{item.value}</div>
-                        <div className="text-[10px] font-medium text-sand-500 dark:text-sand-400 uppercase truncate">{item.label}</div>
+                        <div className="text-[9px] font-medium tracking-tight text-sand-500 dark:text-sand-400 uppercase">{item.label}</div>
                       </div>
                     ))}
                   </div>
@@ -459,8 +459,8 @@ function HomeContent() {
           <div className="p-4 sm:p-6">
             {/* Navigation Tabs */}
             <nav className="tactical-card mb-6 no-print animate-fade-in-down" aria-label="Main navigation">
-              <div className="border-b border-sand-200 dark:border-forest-700">
-                <div className="flex space-x-1 px-4 overflow-x-auto scrollbar-none" role="tablist">
+              <div className="tab-strip border-b border-sand-200 dark:border-forest-700">
+                <div className="flex gap-4 px-4 overflow-x-auto scrollbar-none" role="tablist">
                   {tabs.map((tab, index) => {
                     const Icon = tab.icon
                     return (

@@ -57,7 +57,7 @@ export default function ConfirmDialog({
     },
     warning: {
       icon: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
-      button: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white',
+      button: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white focus:ring-amber-500',
     },
     info: {
       icon: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
@@ -76,7 +76,7 @@ export default function ConfirmDialog({
       aria-labelledby="dialog-title"
     >
       <div className="modal-content max-w-sm">
-        <div className="p-6">
+        <div className="relative p-6">
           {/* Close button */}
           <button
             onClick={onCancel}

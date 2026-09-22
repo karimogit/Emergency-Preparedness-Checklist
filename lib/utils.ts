@@ -281,7 +281,7 @@ export function convertWaterText(text: string, toUnit: string): string {
  * Get category color with fallback
  */
 export function getCategoryColor(category: string, colorMap: Record<string, string>): string {
-  return colorMap[category] || colorMap['default'] || colorMap['Other'] || 'bg-gray-100 text-gray-800 border-gray-200'
+  return colorMap[category] || colorMap['default'] || colorMap['Other'] || 'bg-sand-100 dark:bg-forest-800 text-sand-700 dark:text-sand-200 border-sand-200 dark:border-forest-600'
 }
 
 /**
