@@ -222,7 +222,7 @@ export default function ChecklistSection({
           <p className="text-xs font-semibold uppercase tracking-wide text-sand-500 dark:text-sand-400">Household</p>
           <p className="mt-2 font-serif text-2xl font-semibold text-forest-950 dark:text-sand-50">{householdLabel}</p>
           <p className="mt-2 text-xs leading-relaxed text-sand-600 dark:text-sand-400">
-            Change adults, children, and pets in the sidebar to update these targets.
+            Change adults, children, and pets in Settings to update these targets.
           </p>
         </div>
       </section>

@@ -314,16 +314,8 @@
     animation: scaleIn 0.2s ease-out;
   }
 
-  /* Sidebar styling — includes the app header/branding */
-  .sidebar {
-    @apply bg-white/95 dark:bg-forest-900/95;
-    @apply border-r border-sand-200 dark:border-forest-700;
-    @apply bg-tactical-pattern;
-    @apply shadow-sm;
-  }
-
-  /* Compact mobile opener; desktop branding lives in the sidebar */
-  .mobile-shell-bar {
+  /* Header styling */
+  .header {
     @apply bg-white/90 dark:bg-forest-900/90 backdrop-blur-md;
     @apply border-b border-sand-200 dark:border-forest-700;
     @apply shadow-sm;
